@@ -1,25 +1,29 @@
 ---
-title: "Lab 1"
+title: "HKS SUP-135 Lab 1: Introductory Statistical Concepts and Statistical Computing"
 author: "Matt Khinda"
 date: "2/3/2023"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+# Settings for PDF output
+knitr::opts_chunk$set(echo = TRUE) 
+knitr::opts_chunk$set(fig.width=12, fig.height=6, fig.align = "center") 
 
+# Require packages and install and load if not already
 if (!require(haven)) install.packages("haven"); library(haven)
 if (!require(tidyverse)) install.packages("tidyverse"); library(tidyverse)
 if (!require(ggplot2)) install.packages("ggplot2"); library(ggplot2)
 if (!require(here)) install.packages("here"); library(here)
 ```
 
-## Load Data
-
 ```{r load data, include=FALSE}
-# Load dataset found in the folder "datasets" in the working directory 
-nlsy <- read_dta(here("datasets", "nlsy97.dta"))
+# Clear workspace
+rm(list=ls())
+cat('\014')
 
+# Load dataset found in the folder "datasets" 
+nlsy <- read_dta(here("datasets", "nlsy97.dta"))
 ```
 
 ## Question 1: Histogram
@@ -35,25 +39,25 @@ inc_hist
 
 ```{r mean, echo=FALSE}
 inc_mean <- mean(nlsy$kid_income, na.rm = TRUE)
-cat("The mean income is $", inc_mean, sep="")
+cat("The mean income for the sample is $", inc_mean, sep="")
 ```
 
 ## Question 3: Conditional Variables
 
 #### 3a: Below the mean
-```{r cond_1, echo=FALSE}
-nlsy <- nlsy %>% mutate(below_mean = ifelse(nlsy$kid_income > inc_mean, 0, 1))
+```{r cond 1, echo=FALSE}
+nlsy$below_mean <- ifelse(nlsy$kid_income > inc_mean, 0, 1)
 ```
 
-#### 3b: Average below mean
-```{r cond_2, echo=FALSE}
-pct_below_mean <- mean(nlsy$below_mean)
-cat("The percent of children below the mean income is ", pct_below_mean*100, "%", sep = "")
+#### 3b: Percent below mean
+```{r cond 2, echo=FALSE}
+pct_below_mean <- mean(nlsy$below_mean)*100
+cat("The percent of children below the mean income is ", pct_below_mean, "%", sep = "")
 ```
 
 #### 3c: Why is it not 50%?
-```{r cond_3, echo=FALSE}
-paste("Because the distribution shown above in the histogram is not normal")
+```{r cond 3, echo=FALSE}
+cat("Because the incomes (shown in the histogram above) are not evenly distributed.")
 ```
 
 ## Question 4: Median
@@ -67,14 +71,14 @@ cat("The median income is $", inc_med, sep = "")
 
 ```{r sd, echo=FALSE}
 inc_sd <- sd(nlsy$kid_income)
-cat("One stanard deviation of income is equal to $", inc_sd, sep = "")
+cat("One stanard deviation is equal to $", inc_sd, sep = "")
 ```
 
 ## Question 6: Wihtin 1 or 2 Standard Deviations
 
-```{r within_sd, echo=FALSE}
-nlsy <- nlsy %>% mutate(sd1 = ifelse(abs(nlsy$kid_income - inc_mean) < inc_sd, 1, 0))
-nlsy <- nlsy %>% mutate(sd2 = ifelse(abs(nlsy$kid_income - inc_mean) < inc_sd*2, 1, 0))
+```{r within sd, echo=FALSE}
+nlsy$sd1 <- ifelse(abs(nlsy$kid_income - inc_mean) < inc_sd, 1, 0)
+nlsy$sd2 <- ifelse(abs(nlsy$kid_income - inc_mean) < inc_sd*2, 1, 0)
 
 cat("The percent of children within one standard deviation is ", mean(nlsy$sd1)*100, "%. ", sep = "")
 cat("The percent of children within two standard deviations is ", mean(nlsy$sd2)*100, "%.", sep = "")
@@ -84,7 +88,7 @@ cat("The percent of children within two standard deviations is ", mean(nlsy$sd2)
 
 #### 7a: Rank incomes
 ```{r pct ranks, echo=FALSE}
-nlsy <- nlsy %>% mutate(kid_inc_rank = rank(nlsy$kid_income, na.last = TRUE))
+nlsy$kid_inc_rank <- rank(nlsy$kid_income, na.last = TRUE)
 ```
 
 #### 7b: Sort by rank
@@ -93,18 +97,28 @@ nlsy[order(nlsy$kid_inc_rank),]
 ```
 #### 7c: Normalize rank
 ```{r normal ranks, echo=FALSE}
+# Define pct_rank function
+pct_rank <- function(x){
+  #Catch NAs
+  r <- ifelse(is.na(x),NA, rank(x,ties.method = "average"))
+  #return percentile rank
+  100*r/max(r,na.rm = TRUE)
+}
+
 # Overwrite kid_inc_rank with new percentile ranks
-nlsy <- nlsy %>% mutate(kid_inc_rank = percent_rank(nlsy$kid_income)*100)
+nlsy$kid_inc_rank <- pct_rank(nlsy$kid_income)
 ```
 
-
+#### 7d: Browse the data
 
 ## Question 8: Percentile Rank Distribution
 
 #### 8a: Plot percentile rank distribution
 ```{r rank hist, echo=FALSE}
-ggplot(nlsy) +
+pctrank_hist <- ggplot(nlsy) +
   geom_histogram(aes(x = kid_inc_rank), bins = 50)
+
+pctrank_hist
 ```
 
 #### 8b: Validate percentile rank mean and median
@@ -115,10 +129,63 @@ inc_pctrnk_med <- median(nlsy$kid_inc_rank, na.rm = TRUE)
 cat("The mean percentile rank is", inc_pctrnk_mean, " while the median percentile rank is", inc_pctrnk_med)
 ```
 
+## Question 9: Relationships
 
+#### Linear correlation  
+```{r linear, message = FALSE, echo=FALSE}
+linear_rel_plot <- ggplot(nlsy,aes(x = child_education, y = kid_income)) +
+  stat_smooth(method = "lm", se = FALSE) +
+  stat_summary_bin(fun="mean", bins=10, size=2, geom="point")
 
+linear_rel_plot
+```
 
+#### Non-linear correlation  
+```{r nonlinear, message = FALSE, echo=FALSE}
+nonlinear_rel_plot <- ggplot(nlsy,aes(x = mother_education, y = kid_income)) +
+  stat_smooth(method = "lm", se = FALSE) +
+  stat_summary_bin(fun="mean", bins=10, size=2, geom="point")
 
+nonlinear_rel_plot
+```
 
+## Question 10: Randomization  
 
+#### 10a: Generate and assign random values
+```{r rand assign, echo=FALSE}
+# Set random seed based on HUID number
+HUID <- 41531460
+set.seed(HUID)
 
+# Generate list of random values between 0 and 1
+random_values <- runif(nrow(nlsy))
+
+# Assign random values to rows in dataframe
+nlsy$rand_val <- random_values[nlsy$id_num]
+```
+
+#### 10b: Determine treatment group status
+```{r tgroup, echo=FALSE}
+nlsy$treatment_group <- ifelse(nlsy$rand_val > .5, 1,0)
+
+nlsy_treatment_group <- filter(nlsy, nlsy$treatment_group == 1)
+nlsy_control_group <- filter(nlsy, nlsy$treatment_group == 0)
+
+cat("There are", nrow(nlsy_treatment_group), "observations in the treatment group and", nrow(nlsy_control_group), "observations in the control group.")
+```
+
+#### 10c: Treatment Group 
+```{r tgroup summary, echo=FALSE}
+nlsy_treatment_group %>% summarise_all(c("mean","sd"))
+```
+
+#### Control Group
+```{r cgroup summary, echo=FALSE}
+nlsy_control_group %>% summarise_all(c("mean","sd"))
+```
+
+#### 10d: Google form submisson
+[submitted]
+
+#### 10e: What is the purpose of random assigment in an experiment?
+Random assignment seeks to reduce or eliminate selection bias either on the part of participants (in the case of opt-in trials) or the researchers (in the case of researcher selection). For this reason, I would prefer to use random assignment to best achieve comparability.
