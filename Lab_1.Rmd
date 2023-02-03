@@ -74,7 +74,7 @@ inc_sd <- sd(nlsy$kid_income)
 cat("One stanard deviation is equal to $", inc_sd, sep = "")
 ```
 
-## Question 6: Wihtin 1 or 2 Standard Deviations
+## Question 6: Within 1 or 2 Standard Deviations
 
 ```{r within sd, echo=FALSE}
 nlsy$sd1 <- ifelse(abs(nlsy$kid_income - inc_mean) < inc_sd, 1, 0)
