@@ -160,7 +160,8 @@ black_men_absMobility25 <- 25.70348 + 0.29432*25
 white_men_absMobility25 <- 40.11022 + 0.26692*25
 
 cat("The predicted income rank for Black men born to parents at the 
-    25th percentile rank is", black_men_absMobility25, "while for white men it is", white_men_absMobility25)
+    25th percentile rank is", black_men_absMobility25, "while for white men it 
+    is", white_men_absMobility25)
 ```
 
 #### 6b: Relative Mobility
@@ -176,8 +177,10 @@ cat("The relative mobility measure for Black men is", black_men_relMobility,
 #### 6c: Horatio Alger Measure
 
 ```{r disparity_measure 3}
-black_men_horatioAlger <- with(subset(black_men, parent_inc_rank < 20), mean(top_20, na.rm = T))
-white_men_horatioAlger <- with(subset(white_men, parent_inc_rank < 20), mean(top_20, na.rm = T))
+black_men_horatioAlger <- with(subset(black_men, parent_inc_rank < 20), 
+                               mean(top_20, na.rm = T))
+white_men_horatioAlger <- with(subset(white_men, parent_inc_rank < 20), 
+                               mean(top_20, na.rm = T))
 
 cat("The probability that a Black man born to parents in the bottom income 
     quintile reaches the top income quintile is ",black_men_horatioAlger*100, 
@@ -196,7 +199,7 @@ cat("The fraction of Black men earning more than their parents in
     the fraction of white men is ", white_men_absMobility*100, "%",sep="")
 ```
 
-Of the four measures of mobility presented above, three of them (absolute mobility at the 25th percentile, relative mobility, and the Horatio Alger measure) show a clear disparity in outcomes for white and Black men. However, because absolute mobility is nearly the same for white and Black men it would be misleading to make a determination on that statistic alone. Therefore it does matter which measure you use to determine if there is a racial disparity. 
+Of the four measures of economic mobility presented above, three of them (absolute mobility at the 25th percentile, relative mobility, and the Horatio Alger measure) show a clear disparity in outcomes for white and Black men. However, because absolute mobility is nearly the same for white and Black men it would be misleading to make a determination on that statistic alone. Therefore it does matter which measure you use to determine if there is a racial disparity. 
 
 
 ## Question 7: Regression vs Arithmetic Mean
