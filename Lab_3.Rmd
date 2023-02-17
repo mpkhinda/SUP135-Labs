@@ -1,0 +1,121 @@
+---
+title: "HKS SUP-135 Lab 3: The Moving to Opportunity Experiment"
+author: "Matt Khinda"
+date: "2/17/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# Settings for PDF output
+knitr::opts_chunk$set(echo = TRUE) 
+knitr::opts_chunk$set(fig.width=12, fig.height=6, fig.align = "center") 
+
+# Require packages and install and load if not already
+if (!require(haven)) install.packages("haven"); library(haven)
+if (!require(tidyverse)) install.packages("tidyverse"); library(tidyverse)
+if (!require(ggplot2)) install.packages("ggplot2"); library(ggplot2)
+if (!require(statar)) install.packages("statar"); library(statar)
+if (!require(here)) install.packages("here"); library(here)
+
+# Clear workspace
+rm(list=ls())
+cat('\014')
+```
+
+```{r laod data}
+mto <- read_dta(here("datasets", "mto.dta"))
+```
+
+## Question 1: Reflecting on Moving to Opportunity Results
+
+
+Stat sig for young children (econ outcomes, health outcomes) 
+
+Non sig for older childrent and adults
+
+
+## Questions  2 & 3: Mean Moved for Contorl & Treatment Groups
+
+```{r move 1}
+mto_moved <- by(mto$moved, list(mto$voucher), mean)
+```
+
+
+## Question 4: Linear Regression 
+
+```{r move 2}
+moved_lm <- lm(moved~voucher, data = mto)
+moved_lm
+```
+
+## Question 5: Complianced Rate
+
+One-sided 
+
+## Question 6: Intent to Treat (ITT) Effect
+
+```{r itt}
+kessler_lm <- lm(kessler~voucher, data = mto)
+kessler_lm
+```
+
+## Question 7: Treatment on the Treated (TOT) Effect
+
+```{r tot}
+kessler_tot <- kessler_lm$coefficients["voucher"]/moved_lm$coefficients["voucher"]
+kessler_tot
+```
+
+## Question 8: Incorrect As-Treated Analysis
+
+```{r astreat}
+# Make indicator variable moved rather than voucher
+asTreated_lm <- lm(kessler~moved, data = mto) 
+asTreated_lm
+```
+
+## Question 9: Incorrect Per Protocol Analysis
+
+```{r perproto}
+# Filter out non-compliance
+mto_comply <- filter(mto, mto$voucher == mto$moved)
+
+comply_lm <- lm(kessler~voucher, data = mto_comply)
+comply_lm
+```
+
+## Question 10: Comparing Measures
+
+
+
+## Question 11: Bias in As-Treated and Per Protocol Analyses
+
+
+## Question 12: Visualizing Results
+
+#### 12a: Moved Bar Chart
+```{r chart 1}
+# Create data frame
+mto_moved <- mto %>%
+  group_by(voucher) %>% 
+  summarise(mean = mean(moved)) %>%
+  mutate(group = ifelse(voucher == 1, "Treatment", "Control")) %>%
+  select(group, mean)
+
+# Plot
+ggplot(data=mto_moved, aes(x=group, y=mean, fill=group)) +
+  geom_bar(stat="identity", show.legend = FALSE, width=.6) +
+  scale_fill_manual(values=c("red", "blue")) +
+  labs(y = "Moved Using Experimental Voucher", x = "")
+```
+
+
+#### 12b: ITT Bar Chart
+```{r chart 2}
+
+```
+
+#### 12c: TOT Bar Chart
+```{r chart 3}
+
+```
