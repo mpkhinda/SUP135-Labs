@@ -1,0 +1,102 @@
+---
+title: 'HKS SUP-135 Project Part 1: Exploratory Data Analysis'
+author: "Matt Khinda"
+date: "2/25/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# Settings for PDF output
+knitr::opts_chunk$set(echo = FALSE) 
+knitr::opts_chunk$set(fig.width=12, fig.height=6, fig.align = "center") 
+
+# Require packages and install and load if not already
+if (!require(haven)) install.packages("haven"); library(haven)
+if (!require(tidyverse)) install.packages("tidyverse"); library(tidyverse)
+if (!require(ggplot2)) install.packages("ggplot2"); library(ggplot2)
+if (!require(statar)) install.packages("statar"); library(statar)
+if (!require(here)) install.packages("here"); library(here)
+if (!require(sandwich)) install.packages("sandwich"); library(sandwich)
+if (!require(lmtest)) install.packages("lmtest"); library(lmtest)
+
+# Clear workspace
+rm(list=ls())
+cat('\014')
+```
+
+```{r load data, include=FALSE}
+atlas <- read_dta(here("datasets", "atlas.dta"))
+```
+
+## Question 1: Exploring the Opportunity Atlas (Washington, DC)
+
+![Screenshot from the Opportunity Atlas displaying household income at age 35 for children of low-income parents in Washington, DC](img/WashingtonDC_OpportunityAtlas.png)
+
+## Question 2: Identifying Missing Data
+
+```{r missing data}
+
+```
+
+
+## Question 3: Absolute Mobility at the 25th Percentile
+
+#### 3a: Units
+
+
+#### 3b: Interpreting values
+
+
+#### 3c: Rationale for using a linear model
+
+
+## Question 4: Histogram of Absolute Mobility at the 25th Percentile
+```{r mobility hist}
+
+```
+
+## Question 5: Summary Statistics for Absolute Mobility at the 25th Percentile
+```{r mobility summary stats}
+
+```
+
+## Question 6: Extreme Values
+
+
+## Question 7: Home Tract Comparison of Absolute Mobility at the 25th Percentile
+```{r mobility home tract}
+
+```
+
+## Question 8: Home County Standard Deviation for Absolute Mobility at the 25th Percentile
+```{r mobility sd home county}
+
+```
+
+## Question 9: Upward Mobility & Rent
+
+#### 9a: Plotting County-Level Absolute Mobility at the 25th Percentile vs Rent
+```{r mobility rent plot}
+
+```
+
+#### 9b: Reflections
+
+
+#### 9c: Identifying “Opportunity Bargains”
+```{r mobility rent bargains}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
