@@ -7,7 +7,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 # Settings for PDF output
-knitr::opts_chunk$set(echo = FALSE) 
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE) 
 knitr::opts_chunk$set(fig.width=12, fig.height=6, fig.align = "center") 
 
 # Require packages and install and load if not already
@@ -16,6 +16,7 @@ if (!require(tidyverse)) install.packages("tidyverse"); library(tidyverse)
 if (!require(ggplot2)) install.packages("ggplot2"); library(ggplot2)
 if (!require(statar)) install.packages("statar"); library(statar)
 if (!require(here)) install.packages("here"); library(here)
+if (!require(htmltools)) install.packages("htmltools"); library(htmltools)
 if (!require(sandwich)) install.packages("sandwich"); library(sandwich)
 if (!require(lmtest)) install.packages("lmtest"); library(lmtest)
 
@@ -28,43 +29,69 @@ cat('\014')
 atlas <- read_dta(here("datasets", "atlas.dta"))
 ```
 
-## Question 1: Exploring the Opportunity Atlas (Washington, DC)
+## Question 1: Exploring the Opportunity Atlas (Washington, DC)  
 
-![Screenshot from the Opportunity Atlas displaying household income at age 35 for children of low-income parents in Washington, DC](img/WashingtonDC_OpportunityAtlas.png)
+This screenshot from the Opportunity Atlas website shows household income at age 35 for children of low-income parents in Washington, DC. The census tract where I grew up (tract 11001000600) is highlighted with a black outline. 
+
+![Screenshot of Washington, DC from the Opportunity Atlas (www.opportunityatlas.org)](img/WashingtonDC_OpportunityAtlas.png)
 
 ## Question 2: Identifying Missing Data
 
 ```{r missing data}
-
+# Calculate total number of missing values
+total_NA <- sum(is.na(atlas))
+# Locate columns that contain missing values, count, and create dataframe
+cols_NA <- data.frame(as.list(colSums(is.na(atlas)))) %>% 
+           pivot_longer(everything(), 
+                        names_to = "variable", 
+                        values_to = "missing_vals")
 ```
 
+There are `r total_NA` missing values in the Opportunity Atlas dataset.   
+They appear in the following variables: 
+```{r print NA list}
+knitr::kable(cols_NA)
+```
 
 ## Question 3: Absolute Mobility at the 25th Percentile
 
-#### 3a: Units
-
+#### 3a: Units  
+In the Opportunity Atlas dataset, Absolute Mobility at the 25th percentile (kfr_pooled_pooled_p25) is measured as a percentile rank within the national household income distribution as measured in 2014-2015 tax data. In this sense, it does not measure an absolute amount of income in dollars but rather shows how the average income in that tract compares to the rest of the country.
 
 #### 3b: Interpreting values
-
+In this variable, higher values signify greater economic outcomes and upward mobility. For example, a value of 100 signifies that the average income in that tract for someone born to parents at the 25th income percentile falls in the top 1% of incomes in the nation. Conversely, a value of 0 would indicate that the average income in that tract for that same group falls in the bottom 1%. 
 
 #### 3c: Rationale for using a linear model
 
 
+
 ## Question 4: Histogram of Absolute Mobility at the 25th Percentile
 ```{r mobility hist}
-
+ggplot(data = atlas) +
+  geom_histogram(aes(x = kfr_pooled_pooled_p25), fill = "black", bins = 100) + 
+  labs(title = "Distribution of Mean Income Percentile Rank for Children of Low-Income Parents", y = "Number of Census Tracts", x = "Mean Income Percentile Rank") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(size=18,hjust = 0.5))
 ```
 
 ## Question 5: Summary Statistics for Absolute Mobility at the 25th Percentile
 ```{r mobility summary stats}
+# Get summary stats
+sumStats_absMob_25 <- summary(atlas$kfr_pooled_pooled_p25)
+# Add standard dev to summary stats
+sumStats_absMob_25["Std. Dev"] <- sd(atlas$kfr_pooled_pooled_p25, na.rm = T)
 
+sumStats_absMob_25
 ```
 
 ## Question 6: Extreme Values
+One of the limitations of a linear model is that it establishes a uniform and continous relationship between the predictor variable and the response variable. As such, it does not account for or respect particular upper or lower bounds — in this case the 100th and 0th percentile respectively. So, there may be cases where a certain input returns a value above the 100th or below the 0th percentile, as we see in the summary statistics for the kfr_pooled_pooled_p25 variable above. 
 
 
 ## Question 7: Home Tract Comparison of Absolute Mobility at the 25th Percentile
 ```{r mobility home tract}
+DC_atlas <- subset(atlas, state == 11)
+tract_atlas <- subset(atlas, state == 11 & tract == 600)
 
 ```
 
@@ -89,14 +116,42 @@ atlas <- read_dta(here("datasets", "atlas.dta"))
 ```
 
 
+## Question 10: Change Over the Past 20 Years
+
+#### 10a: Comparison Scatter Plots
+```{r time compare plot}
+
+```
+
+#### 10b: Describing Change Over Time
 
 
 
+## Question 11: Redlining
 
+#### 11a: 
+```{r aer}
 
+```
 
+#### 11b: 
+```{r b}
 
+```
 
+#### 11c: 
+```{r re}
 
+```
+
+#### 11d: 
+```{r d}
+
+```
+
+#### 11e: 
+```{r e}
+
+```
 
 
