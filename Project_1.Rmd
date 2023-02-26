@@ -93,27 +93,44 @@ One of the limitations of a linear model is that it establishes a uniform and co
 DC_atlas <- subset(atlas, state == 11)
 tract_atlas <- subset(atlas, state == 11 & tract == 600)
 
+full_mean <- mean(atlas$kfr_pooled_pooled_p25, na.rm = T)
+dc_mean <- mean(DC_atlas$kfr_pooled_pooled_p25, na.rm = T)
+tract_mean <- tract_atlas$kfr_pooled_pooled_p25
 ```
+In my home tract, the average income percentile rank reached by someone born to parents at the 25th percentile of income is 51.78702, which is higher than both the state average of 37.31235 and national average of 42.85813.
 
 ## Question 8: Home County Standard Deviation for Absolute Mobility at the 25th Percentile
 ```{r mobility sd home county}
-
+# Using just state dataframe because state and county are the same for DC
+dc_sd <- sd(DC_atlas$kfr_pooled_pooled_p25, na.rm = T)
+full_sd <- sd(atlas$kfr_pooled_pooled_p25, na.rm = T)
 ```
+The standard deviation of kfr_pooled_pooled_p25 in my home county is 6.406956, which is also the standard deviation for the state because the District of Columbia only contains one county. This is less than the standard deviation of kfr_pooled_pooled_p25 in the national dataset of 7.126422. From this measure we can conclude that the distribution of outcomes is more narrowly concentrated in DC than in the United States as a whole. 
+
 
 ## Question 9: Upward Mobility & Rent
 
 #### 9a: Plotting County-Level Absolute Mobility at the 25th Percentile vs Rent
 ```{r mobility rent plot}
-
+ggplot(data = DC_atlas, aes(x = kfr_pooled_pooled_p25, y = rent_twobed2015)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -50) +
+  labs(title = "Mean Income Percentile Rank for Children of Low-Income Parents vs. Rent in Washington, DC", x = "Mean Income Percentile Rank", y = "Average Rent for Two-Bedroom Apartment in 2015") +
+  stat_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
 ```
 
 #### 9b: Reflections
-
+The line of best fit in the plot above shows that there is a positive correlation between rent and mean income percentile rank, meaning that rent is typically higher in tracts with better economic outcomes for children of low-income parents. However, it is apparent that there is quite a lot of variance at the individual tract level. There are some tracts (tract 202) where rent is significantly higher than predicted based on the observed economic outcomes, while other tracts (tract 1402) cost significantly less than expected for their economic outcomes. 
 
 #### 9c: Identifying “Opportunity Bargains”
 ```{r mobility rent bargains}
 
 ```
+
+In order to determine if a particular tract is an "opportunity bargain" we can compare the rent predicted by the linear model (based on observed economic outcomes) and the reported rent for that tract. If reported rent is below predicted rent then we can say the tract is in fact an "opportunity bargain." 
+
 
 
 ## Question 10: Change Over the Past 20 Years
@@ -153,5 +170,15 @@ tract_atlas <- subset(atlas, state == 11 & tract == 600)
 ```{r e}
 
 ```
+
+
+## Question 12: 
+
+
+
+
+
+
+
 
 
