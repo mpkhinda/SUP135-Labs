@@ -137,42 +137,215 @@ In order to determine if a particular tract is an "opportunity bargain" we can c
 
 #### 10a: Comparison Scatter Plots
 ```{r time compare plot}
+# Plot change in poverty
+ggplot(data = DC_atlas, aes(x = poor_share1990, y = poor_share2010)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -.025) +
+  labs(title = "Poverty Rate in DC 2010 vs. 1990", x = "Poverty Rate in 1990", y = "Poverty Rate in 2010") +
+  stat_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(breaks = seq(0,1, by = 0.1)) +
+  scale_y_continuous(breaks = seq(0,1, by = 0.1)) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
 
+# Plot change in Black pop
+ggplot(data = DC_atlas, aes(x = share_black2000, y = share_black2010)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -.025) +
+  labs(title = "Fraction of Population Identifying as Black in DC 2010 vs. 2000", x = "Fraction of Black Residents in 2000", y = "Fraction of Black Residents in 2010") +
+  stat_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(breaks = seq(0,1, by = 0.1)) +
+  scale_y_continuous(breaks = seq(0,1, by = 0.1)) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+# Plot change in Hispanic pop
+ggplot(data = DC_atlas, aes(x = share_hisp2000, y = share_hisp2010)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -.025) +
+  labs(title = "Fraction of Population Identifying as Hispanic in DC 2010 vs. 2000", x = "Fraction of Hispanic Residents in 2000", y = "Fraction of Hispanic Residents in 2010") +
+  stat_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(breaks = seq(0,1, by = 0.1)) +
+  scale_y_continuous(breaks = seq(0,1, by = 0.1)) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+# Plot change in Asian pop
+ggplot(data = DC_atlas, aes(x = share_asian2000, y = share_asian2010)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -.025) +
+  labs(title = "Fraction of Population Identifying as Asian in DC 2010 vs. 2000", x = "Fraction of Asian Residents in 2000", y = "Fraction of Asian Residents in 2010") +
+  stat_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(breaks = seq(0,1, by = 0.1)) +
+  scale_y_continuous(breaks = seq(0,1, by = 0.1)) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+# Plot change in White pop
+ggplot(data = DC_atlas, aes(x = share_white2000, y = share_white2010)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -.025) +
+  labs(title = "Fraction of Population Identifying as White in DC 2010 vs. 2000", x = "Fraction of White Residents in 2000", y = "Fraction of White Residents in 2010") +
+  stat_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(breaks = seq(0,1, by = 0.1)) +
+  scale_y_continuous(breaks = seq(0,1, by = 0.1)) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
 ```
 
 #### 10b: Describing Change Over Time
-
+In the scatter plots above, a number of interesting economic and demographic trends are apparent. First, we notice in the comparison of poverty rates bewteen 2010 and 1990 that 
 
 
 ## Question 11: Redlining
 
-#### 11a: 
-```{r aer}
+#### 11a: HOLC Grades and Upward Mobility
+```{r holc grades}
+HOLC_A <- subset(atlas, HOLC_A> 0.5 & !is.na(HOLC_A))
+HOLC_B <- subset(atlas, HOLC_B> 0.5 & !is.na(HOLC_B))
+HOLC_C <- subset(atlas, HOLC_C> 0.5 & !is.na(HOLC_C))
+HOLC_D <- subset(atlas, HOLC_D> 0.5 & !is.na(HOLC_D))
+
+mean_A <- mean(HOLC_A$kfr_pooled_pooled_p25, na.rm = T)
+mean_B <- mean(HOLC_B$kfr_pooled_pooled_p25, na.rm = T)
+mean_C <- mean(HOLC_C$kfr_pooled_pooled_p25, na.rm = T)
+mean_D <- mean(HOLC_D$kfr_pooled_pooled_p25, na.rm = T)
+```
+There is a clear correlation between a higher HOLC grade and greater economic mobility in a given census tract in the United States. Tracts with a majority of the area graded A had a mean kfr_pooled_pooled_p25 value of 44.0140, those majority graded B had a mean value of 42.4677, those majority graded C had a mean value of 39.8727, and those majority graded D had a mean value of 36.1583. 
+
+#### 11b: HOLC Grades and Racial Composition of Tracts
+```{r holc blk pop}
+mean_blk_A <- mean(HOLC_A$share_black2000, na.rm = T)
+mean_blk_B <- mean(HOLC_B$share_black2000, na.rm = T)
+mean_blk_C <- mean(HOLC_C$share_black2000, na.rm = T)
+mean_blk_D <- mean(HOLC_D$share_black2000, na.rm = T)
+```
+The share of Black residents in a census tract is correlated with HOLC grades. Tracts with a majority of the area graded A had a mean share_black2000 value of 0.2008, those majority graded B had a mean value of 0.2886, those majority graded C had a mean value of 0.3334, and those majority graded D had a mean value of 0.4659. It is fair to say then that this could be a confounding variable in determining the effect of HOLC grades on economic outcomes since we also know that economic outcomes in tracts that are highly segregated or have a high share of Black residents tend to be below average. 
+
+#### 11c: HOLC Grades and Upward Mobility Disaggregated by Race
+```{r hold race mobility}
+mean_blkMob_A <- mean(HOLC_A$kfr_black_pooled_p25, na.rm = T)
+mean_blkMob_B <- mean(HOLC_B$kfr_black_pooled_p25, na.rm = T)
+mean_blkMob_C <- mean(HOLC_C$kfr_black_pooled_p25, na.rm = T)
+mean_blkMob_D <- mean(HOLC_D$kfr_black_pooled_p25, na.rm = T)
+
+mean_whtMob_A <- mean(HOLC_A$kfr_white_pooled_p25, na.rm = T)
+mean_whtMob_B <- mean(HOLC_B$kfr_white_pooled_p25, na.rm = T)
+mean_whtMob_C <- mean(HOLC_C$kfr_white_pooled_p25, na.rm = T)
+mean_whtMob_D <- mean(HOLC_D$kfr_white_pooled_p25, na.rm = T)
+```
+By analyzing measures of Absolute Mobility at the 25th Percentile disaggregated by race we can remove this potential confounding effect and start to better understand the direct relationship between HOLC grades and economic mobility. Because we are comparing the same mobility measure in the same tracts for both White and Black residents, we can then determine if the direction and magnitude of correlation between HOLC grades and outcomes is similar for both groups. Tracts with a majority of the area graded A had a mean kfr_black_pooled_p25 value of 34.4376 and kfr_white_pooled_p25 value of 50.3644, those majority graded B had  mean values of 34.5071 and 48.7535 respectively, those majority graded C had mean values of 33.2393 and 46.3272 respectively, and those majority graded D had mean values of 31.6186 and 44.1159 respectively. From this comparison we can conclude that there is a correlation between HOLC grades and economic outcomes for both Black and White residents, where outcomes increase as the HOLC grade increases (A being the highest), though the magnitude of the effect is much larger for the White population than the Black population.  
+
+
+#### 11d: HOLC Grades and Environmental Characteristics
+```{r holc env}
+# Vegetation by HOLC Grade
+mean_veg_A <- mean(HOLC_A$vegetation, na.rm = T)
+mean_veg_B <- mean(HOLC_B$vegetation, na.rm = T)
+mean_veg_C <- mean(HOLC_C$vegetation, na.rm = T)
+mean_veg_D <- mean(HOLC_D$vegetation, na.rm = T)
+
+# Extreme heat by HOLC Grade
+mean_heat_A <- mean(HOLC_A$extreme_heat, na.rm = T)
+mean_heat_B <- mean(HOLC_B$extreme_heat, na.rm = T)
+mean_heat_C <- mean(HOLC_C$extreme_heat, na.rm = T)
+mean_heat_D <- mean(HOLC_D$extreme_heat, na.rm = T)
+
+# Developed land area by HOLC Grade
+mean_dev_A <- mean(HOLC_A$developed, na.rm = T)
+mean_dev_B <- mean(HOLC_B$developed, na.rm = T)
+mean_dev_C <- mean(HOLC_C$developed, na.rm = T)
+mean_dev_D <- mean(HOLC_D$developed, na.rm = T)
+```
+In keeping with Hoffman, Shandas, and Pendleton's hypothesis, these data show that negative environmental characteristics do correlate with lower HOLC grades. The mean values for vegetation, extreme heat, and fraction of land area developed by HOLC grade are displayed here:
+
+```{r holc env table}
+# Create dataframe to display results
+holc_df <- data.frame(c("A", "B", "C", "D"),
+                       c(mean_veg_A, mean_veg_B, mean_veg_C, mean_veg_D),
+                       c(mean_heat_A, mean_heat_B, mean_heat_C, mean_heat_D),
+                       c(mean_dev_A, mean_dev_B, mean_dev_C, mean_dev_D)) 
+names(holc_df) <- c("HOLC_grade", "vegetation", "extreme_heat", "developed")
+# Display dataframe
+knitr::kable(holc_df)
+```
+
+#### 11e: Bar Charts of Characteristics by HOLC Grades
+```{r holc plots}
+# Add other variables to dataframe for plotting
+holc_df <- holc_df %>%
+  mutate(kfr_pooled_pooled_p25 = c(mean_A, mean_B, mean_C, mean_D),
+         share_black2000 = c(mean_blk_A, mean_blk_B, mean_blk_C, mean_blk_D),
+         kfr_black_pooled_p25 = c(mean_blkMob_A, mean_blkMob_B, mean_blkMob_C, mean_blkMob_D),
+         kfr_white_pooled_p25 = c(mean_whtMob_A, mean_whtMob_B, mean_whtMob_C, mean_whtMob_D))
+# Define holc color scheme
+holc_colors <- c("#498A6B", "#63A9C0", "#E8EB7A", "#DE7A8E")
+
+# Plot Absolute Mobility at the 25th percentile
+ggplot(data=holc_df, aes(x=HOLC_grade, y=kfr_pooled_pooled_p25, fill=HOLC_grade)) +
+  geom_bar(stat="identity", show.legend = FALSE, width=.6) +
+  scale_fill_manual(values=holc_colors) +
+  labs(title = "Absolute Mobility at the 25th Percentile by HOLC Grade", y = "Mean Income Percentile Rank", x = "HOLC Grade") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+# Plot Black population
+ggplot(data=holc_df, aes(x=HOLC_grade, y=share_black2000, fill=HOLC_grade)) +
+  geom_bar(stat="identity", show.legend = FALSE, width=.6) +
+  scale_fill_manual(values=holc_colors) +
+  labs(title = "Fraction of Population Identifying as Black by HOLC Grade", y = "Fraction of Black Residents in 2000", x = "HOLC Grade") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+# Plot Absolute Mobility Black Pop
+ggplot(data=holc_df, aes(x=HOLC_grade, y=kfr_black_pooled_p25, fill=HOLC_grade)) +
+  geom_bar(stat="identity", show.legend = FALSE, width=.6) +
+  scale_fill_manual(values=holc_colors) +
+  labs(title = "Absolute Mobility at the 25th Percentile for Black Residents by HOLC Grade", y = "Mean Income Percentile Rank", x = "HOLC Grade") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+# Plot Absolute Mobility White Pop
+ggplot(data=holc_df, aes(x=HOLC_grade, y=kfr_white_pooled_p25, fill=HOLC_grade)) +
+  geom_bar(stat="identity", show.legend = FALSE, width=.6) +
+  scale_fill_manual(values=holc_colors) +
+  labs(title = "Absolute Mobility at the 25th Percentile for White Residents by HOLC Grade", y = "Mean Income Percentile Rank", x = "HOLC Grade") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+# Plot Vegetation
+ggplot(data=holc_df, aes(x=HOLC_grade, y=vegetation, fill=HOLC_grade)) +
+  geom_bar(stat="identity", show.legend = FALSE, width=.6) +
+  scale_fill_manual(values=holc_colors) +
+  labs(title = "Vegetation by HOLC Grade", y = "Normalized Difference Vegitation Index (NDVI) relative to baseline", x = "HOLC Grade") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+# Plot Heat
+ggplot(data=holc_df, aes(x=HOLC_grade, y=extreme_heat, fill=HOLC_grade)) +
+  geom_bar(stat="identity", show.legend = FALSE, width=.6) +
+  scale_fill_manual(values=holc_colors) +
+  labs(title = "Extreme Heat by HOLC Grade", y = "Summer daytime urban heat in °C relative to baseline", x = "HOLC Grade") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+# Plot Development
+ggplot(data=holc_df, aes(x=HOLC_grade, y=developed, fill=HOLC_grade)) +
+  geom_bar(stat="identity", show.legend = FALSE, width=.6) +
+  scale_fill_manual(values=holc_colors) +
+  labs(title = "Developed Land Area by HOLC Grade", y = "Fraction of land area developed", x = "HOLC Grade") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
 
 ```
 
-#### 11b: 
-```{r b}
+## Question 12: Air Pollution & Upward Mobility
+
+#### 12a: Change in Pollution Over Time
+```{r air pollution over time}
 
 ```
 
-#### 11c: 
-```{r re}
-
-```
-
-#### 11d: 
-```{r d}
-
-```
-
-#### 11e: 
-```{r e}
-
-```
-
-
-## Question 12: 
 
 
 
