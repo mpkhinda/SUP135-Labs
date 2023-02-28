@@ -8,7 +8,7 @@ output: pdf_document
 ```{r setup, include=FALSE}
 # Settings for PDF output
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE) 
-knitr::opts_chunk$set(fig.width=12, fig.height=6, fig.align = "center") 
+knitr::opts_chunk$set(fig.width=12, fig.height=7, fig.align = "center") 
 
 # Require packages and install and load if not already
 if (!require(haven)) install.packages("haven"); library(haven)
@@ -56,13 +56,13 @@ knitr::kable(cols_NA)
 ## Question 3: Absolute Mobility at the 25th Percentile
 
 #### 3a: Units  
-In the Opportunity Atlas dataset, Absolute Mobility at the 25th percentile (kfr_pooled_pooled_p25) is measured as a percentile rank within the national household income distribution as measured in 2014-2015 tax data. In this sense, it does not measure an absolute amount of income in dollars but rather shows how the average income in that tract compares to the rest of the country.
+In the Opportunity Atlas dataset, Absolute Mobility at the 25th percentile (kfr_pooled_pooled_p25) is measured as a percentile rank within the national household income distribution as measured in 2014-2015 tax data. In this sense, it does not measure an absolute amount of income in dollars but rather shows how the average income in that tract for people born to low-income parents compares to the rest of the country.
 
 #### 3b: Interpreting values
-In this variable, higher values signify greater economic outcomes and upward mobility. For example, a value of 100 signifies that the average income in that tract for someone born to parents at the 25th income percentile falls in the top 1% of incomes in the nation. Conversely, a value of 0 would indicate that the average income in that tract for that same group falls in the bottom 1%. 
+In this variable, higher values signify greater economic outcomes and upward mobility. For example, a value of 99 signifies that the average income in that tract for someone born to parents at the 25th income percentile falls in the top 1% of incomes in the nation. Conversely, a value of 1 would indicate that the average income in that tract for that same group falls in the bottom 1%. 
 
 #### 3c: Rationale for using a linear model
-
+A linear model is used to construct this statistic in order to account for the potentially small sample size of observations right at the 25th percentile in a given tract. The arithmetic mean of those limited observations may be higher or lower than the overall trend simply due to variance. Instead, the linear model is fit to the relationship between parents' and childrens' incomes at all percentiles, which provides greater accuracy when measuring the expected outcomes for a given child born to parents at the 25th income percentile in that particular tract. 
 
 
 ## Question 4: Histogram of Absolute Mobility at the 25th Percentile
@@ -97,7 +97,7 @@ full_mean <- mean(atlas$kfr_pooled_pooled_p25, na.rm = T)
 dc_mean <- mean(DC_atlas$kfr_pooled_pooled_p25, na.rm = T)
 tract_mean <- tract_atlas$kfr_pooled_pooled_p25
 ```
-In my home tract, the average income percentile rank reached by someone born to parents at the 25th percentile of income is 51.78702, which is higher than both the state average of 37.31235 and national average of 42.85813.
+In my home tract, the average income percentile rank reached by someone born to parents at the 25th percentile of income is 51.78702, which is higher than both the Washington, DC average of 37.31235 and national average of 42.85813.
 
 ## Question 8: Home County Standard Deviation for Absolute Mobility at the 25th Percentile
 ```{r mobility sd home county}
@@ -126,11 +126,11 @@ The line of best fit in the plot above shows that there is a positive correlatio
 
 #### 9c: Identifying “Opportunity Bargains”
 ```{r mobility rent bargains}
-
+rent_mod <- lm(rent_twobed2015~kfr_pooled_pooled_p25, data = DC_atlas)
+tract_pred_rent <- (rent_mod$coefficients["kfr_pooled_pooled_p25"]*51.78702) + (rent_mod$coefficients["(Intercept)"])
 ```
 
-In order to determine if a particular tract is an "opportunity bargain" we can compare the rent predicted by the linear model (based on observed economic outcomes) and the reported rent for that tract. If reported rent is below predicted rent then we can say the tract is in fact an "opportunity bargain." 
-
+In order to determine if a particular tract is an "opportunity bargain" we can compare the rent predicted by the linear model and the reported rent for that tract. If reported rent is below predicted rent then we can say the tract is in fact an "opportunity bargain." My home tract (600) is an "opportunity bargain" with the predicted average rent for a two bedroom apartment being \$2433.88 and the measured average rent being \$2250 or a bargain of \$183.88. Some other tracts that are "opportunity bargains" as shown in the plot above are tract 1420, tract 1401, and tract 901 — all with high economic opportunity and comparatively low rents. 
 
 
 ## Question 10: Change Over the Past 20 Years
@@ -141,7 +141,7 @@ In order to determine if a particular tract is an "opportunity bargain" we can c
 ggplot(data = DC_atlas, aes(x = poor_share1990, y = poor_share2010)) + 
   geom_point(size = 1) + 
   geom_text(aes(label=tract), size=2.5, nudge_y = -.025) +
-  labs(title = "Poverty Rate in DC 2010 vs. 1990", x = "Poverty Rate in 1990", y = "Poverty Rate in 2010") +
+  labs(title = "Poverty Rate in Washington, DC 2010 vs. 1990", x = "Poverty Rate in 1990", y = "Poverty Rate in 2010") +
   stat_smooth(method = "lm", se = FALSE) +
   scale_x_continuous(breaks = seq(0,1, by = 0.1)) +
   scale_y_continuous(breaks = seq(0,1, by = 0.1)) +
@@ -152,7 +152,7 @@ ggplot(data = DC_atlas, aes(x = poor_share1990, y = poor_share2010)) +
 ggplot(data = DC_atlas, aes(x = share_black2000, y = share_black2010)) + 
   geom_point(size = 1) + 
   geom_text(aes(label=tract), size=2.5, nudge_y = -.025) +
-  labs(title = "Fraction of Population Identifying as Black in DC 2010 vs. 2000", x = "Fraction of Black Residents in 2000", y = "Fraction of Black Residents in 2010") +
+  labs(title = "Fraction of Population Identifying as Black in Washington, DC 2010 vs. 2000", x = "Fraction of Black Residents in 2000", y = "Fraction of Black Residents in 2010") +
   stat_smooth(method = "lm", se = FALSE) +
   scale_x_continuous(breaks = seq(0,1, by = 0.1)) +
   scale_y_continuous(breaks = seq(0,1, by = 0.1)) +
@@ -162,8 +162,8 @@ ggplot(data = DC_atlas, aes(x = share_black2000, y = share_black2010)) +
 # Plot change in Hispanic pop
 ggplot(data = DC_atlas, aes(x = share_hisp2000, y = share_hisp2010)) + 
   geom_point(size = 1) + 
-  geom_text(aes(label=tract), size=2.5, nudge_y = -.025) +
-  labs(title = "Fraction of Population Identifying as Hispanic in DC 2010 vs. 2000", x = "Fraction of Hispanic Residents in 2000", y = "Fraction of Hispanic Residents in 2010") +
+  geom_text(aes(label=tract), size=2.5, nudge_y = -.01) +
+  labs(title = "Fraction of Population Identifying as Hispanic in Washington, DC 2010 vs. 2000", x = "Fraction of Hispanic Residents in 2000", y = "Fraction of Hispanic Residents in 2010") +
   stat_smooth(method = "lm", se = FALSE) +
   scale_x_continuous(breaks = seq(0,1, by = 0.1)) +
   scale_y_continuous(breaks = seq(0,1, by = 0.1)) +
@@ -173,8 +173,8 @@ ggplot(data = DC_atlas, aes(x = share_hisp2000, y = share_hisp2010)) +
 # Plot change in Asian pop
 ggplot(data = DC_atlas, aes(x = share_asian2000, y = share_asian2010)) + 
   geom_point(size = 1) + 
-  geom_text(aes(label=tract), size=2.5, nudge_y = -.025) +
-  labs(title = "Fraction of Population Identifying as Asian in DC 2010 vs. 2000", x = "Fraction of Asian Residents in 2000", y = "Fraction of Asian Residents in 2010") +
+  geom_text(aes(label=tract), size=2.5, nudge_y = -.01) +
+  labs(title = "Fraction of Population Identifying as Asian in Washington, DC 2010 vs. 2000", x = "Fraction of Asian Residents in 2000", y = "Fraction of Asian Residents in 2010") +
   stat_smooth(method = "lm", se = FALSE) +
   scale_x_continuous(breaks = seq(0,1, by = 0.1)) +
   scale_y_continuous(breaks = seq(0,1, by = 0.1)) +
@@ -185,7 +185,7 @@ ggplot(data = DC_atlas, aes(x = share_asian2000, y = share_asian2010)) +
 ggplot(data = DC_atlas, aes(x = share_white2000, y = share_white2010)) + 
   geom_point(size = 1) + 
   geom_text(aes(label=tract), size=2.5, nudge_y = -.025) +
-  labs(title = "Fraction of Population Identifying as White in DC 2010 vs. 2000", x = "Fraction of White Residents in 2000", y = "Fraction of White Residents in 2010") +
+  labs(title = "Fraction of Population Identifying as White in Washington, DC 2010 vs. 2000", x = "Fraction of White Residents in 2000", y = "Fraction of White Residents in 2010") +
   stat_smooth(method = "lm", se = FALSE) +
   scale_x_continuous(breaks = seq(0,1, by = 0.1)) +
   scale_y_continuous(breaks = seq(0,1, by = 0.1)) +
@@ -194,8 +194,7 @@ ggplot(data = DC_atlas, aes(x = share_white2000, y = share_white2010)) +
 ```
 
 #### 10b: Describing Change Over Time
-In the scatter plots above, a number of interesting economic and demographic trends are apparent. First, we notice in the comparison of poverty rates bewteen 2010 and 1990 that 
-
+In the scatter plots above, a number of interesting economic and demographic trends are apparent. First, we notice in the comparison of poverty that tracts with a poverty rate of 0.25 or less in 1990 seem to have increased that share by 2010 on average, while those with a poverty rate higher than 0.25 in 1990 have decreased their share of the population living below the poverty line on average. Demographically, nearly all tracts have decreased their fraction of Black residents between 2000-2010 except for a cluster of tracts with a nearly entirely Black population which speaks to the intense and deepening racial segregation of Washington, DC. A parallel trend can be seen in the change in fraction of White residents between 2000-2010 which has largely grown on average, which may allude to gentrification or homogenization of once racially diverse or more significantly minority neighborhoods. 
 
 ## Question 11: Redlining
 
@@ -336,21 +335,136 @@ ggplot(data=holc_df, aes(x=HOLC_grade, y=developed, fill=HOLC_grade)) +
   labs(title = "Developed Land Area by HOLC Grade", y = "Fraction of land area developed", x = "HOLC Grade") + 
   theme_minimal() +
   theme(plot.title = element_text(size=18,hjust = 0.5))
-
 ```
 
 ## Question 12: Air Pollution & Upward Mobility
 
 #### 12a: Change in Pollution Over Time
 ```{r air pollution over time}
+mean_pollution_1982 <- mean(atlas$pm25_1982, na.rm = T)
+mean_pollution_1990 <- mean(atlas$pm25_1990, na.rm = T)
+mean_pollution_2000 <- mean(atlas$pm25_2000, na.rm = T)
+mean_pollution_2010 <- mean(atlas$pm25_2010, na.rm = T)
+```
+Over the past forty years air pollution has trended downwards from 20.4198 PM_2.5 in 1982 to 16.8441 in 1990 to 12.5006 in 2000 and finally to 9.2864 in 2010.
 
+
+#### 12b: Tract and National Pollution Comparison
+```{r air pollution compare}
+tract_pollution_1990 <- tract_atlas$pm25_1990
+```
+The air pollution in my home tract in 1990 was 22.0052 which was higher than the national average of 16.8441 for that same year.
+
+#### 12c: Pollution and Upward Mobility Binned Scatter Plot
+```{r air pollution binned plot}
+ggplot(data = atlas,aes(x = pm25_1990, y = kfr_pooled_pooled_p25)) +
+  stat_binmean(n=30) +
+  labs(title = "Absolute Mobility at the 25th Percentile by Air Pollution", y = "Mean Income Percentile", x = "Concentration of Ambient Fine Particulate Matter (PM_2.5)") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
 ```
 
+#### 12d: Pollution and Upward Mobility Correlation Coefficient
+```{r air pollution coefficient}
+cor_coeff_pollution <- cor(atlas$kfr_pooled_pooled_p25, atlas$pm25_1990, use = "complete.obs")
+```
+The correlation coefficient between kfr_pooled_pooled_p25 and pm25_1990 across census tracts is -0.1837, which is smaller than the county-level coefficient of -0.6 found by Colmer, Voorheis, and Williams. One possible explanation for this could be that there is greater variance in the tract level data than in the county level data, and as sample variance increases the estimated correlation coefficient becomes smaller.
+
+\newpage
+
+## Question 13: Other Covariates
+
+#### 13a: Covariate Binned Scatter Plots
+```{r cov binned plot}
+# Covariate 1: Fraction of Population Incarcerated
+ggplot(data = DC_atlas,aes(x = jail_pooled_pooled_p25, y = kfr_pooled_pooled_p25)) +
+  stat_binmean(n=50) +
+  stat_smooth(method = "lm", se = FALSE, xseq = seq(-0.025,0.1, length=2)) +
+  labs(title = "Absolute Mobility at the 25th Percentile by Incarceration Rate in Washington, DC", y = "Mean Income Percentile", x = "Fraction of Population Incarcerated on April 1, 2010") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+# Covariate 2: Fraction of Population with 
+ggplot(data = DC_atlas,aes(x = frac_coll_plus2010, y = kfr_pooled_pooled_p25)) +
+  stat_binmean(n=50) +
+  stat_smooth(method = "lm", se = FALSE, xseq = seq(0,1, length=2)) +
+  labs(title = "Absolute Mobility at the 25th Percentile by Educational Attainment in Washington, DC", y = "Mean Income Percentile", x = "Fraction of Population with a College Degree or Higher in 2010") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+```
+
+#### 13b: Covariate Coefficients
+```{r cov coefficient}
+cor_coeff_jail <- cor(DC_atlas$kfr_pooled_pooled_p25, DC_atlas$jail_pooled_pooled_p25, use = "complete.obs")
+cor_coeff_edu <- cor(DC_atlas$kfr_pooled_pooled_p25, DC_atlas$frac_coll_plus2010, use = "complete.obs")
+```
+The two covariate relationships identified are with the jail_pooled_pooled_p25 variable which has a correlation coefficient of -0.549 and with the frac_coll_plus2010 variable with a correlation coefficient of 0.719. 
 
 
+## Question 14: Other Covariates by Race and Gender
+Of the two covariates identified, only the fraction of population incarcerated has the corresponding subset data by race and gender. Looking at the relationship between incarceration rate and economic outcomes for Black males, Black females, Hispanic males, Hispanic females, White males, and White females yeilds important information about the unequal impacts of certain factors along demographic lines. The correlation was strongest for Black males with a correlation coefficient of -0.395. Hispanic females had a correlation coefficient of 0.144, though looking at the plot it is easy to tell that there is no real relationship between these variables. For White males, Hispanic males, Black females, and White females the correlation coefficients were weak (between -0.1 and 0.1). 
 
+Binned scatter plots visualizing these relationships are presented below:
 
+```{r disag binned plot}
+# Fraction of Population Incarcerated Black Males
+ggplot(data = DC_atlas,aes(x = jail_black_male_p25, y = kir_black_male_p25)) +
+  stat_binmean(n=50) +
+  stat_smooth(method = "lm", se = FALSE, xseq = seq(-0.025,0.3, length=2)) +
+  labs(title = "Absolute Mobility at the 25th Percentile by Incarceration Rate for Black Males in Washington, DC", y = "Mean Income Percentile for Black Males", x = "Fraction of the Black Male Population Incarcerated on April 1, 2010") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
 
+# Fraction of Population Incarcerated Black Males
+ggplot(data = DC_atlas,aes(x = jail_black_female_p25, y = kir_black_female_p25)) +
+  stat_binmean(n=50) +
+  stat_smooth(method = "lm", se = FALSE, xseq = seq(-0.025,0.15, length=2)) +
+  labs(title = "Absolute Mobility at the 25th Percentile by Incarceration Rate for Black Females in Washington, DC", y = "Mean Income Percentile for Black Females", x = "Fraction of the Black Female Population Incarcerated on April 1, 2010") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+# Fraction of Population Incarcerated Hispanic Males
+ggplot(data = DC_atlas,aes(x = jail_hisp_male_p25, y = kir_hisp_male_p25)) +
+  stat_binmean(n=50) +
+  stat_smooth(method = "lm", se = FALSE, xseq = seq(-0.025,0.3, length=2)) +
+  labs(title = "Absolute Mobility at the 25th Percentile by Incarceration Rate for Hispanic Males in Washington, DC", y = "Mean Income Percentile for Hispanic Males", x = "Fraction of the Hispanic Male Population Incarcerated on April 1, 2010") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+# Fraction of Population Incarcerated Hispanic Females
+ggplot(data = DC_atlas,aes(x = jail_hisp_female_p25, y = kir_hisp_female_p25)) +
+  stat_binmean(n=50) +
+  stat_smooth(method = "lm", se = FALSE, xseq = seq(-0.1,0.15, length=2)) +
+  labs(title = "Absolute Mobility at the 25th Percentile by Incarceration Rate for Hispanic Females in Washington, DC", y = "Mean Income Percentile for Hispanic Females", x = "Fraction of the Hispanic Female Population Incarcerated on April 1, 2010") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+# Fraction of Population Incarcerated White Males
+ggplot(data = DC_atlas,aes(x = jail_white_male_p25, y = kir_white_male_p25)) +
+  stat_binmean(n=50) +
+  stat_smooth(method = "lm", se = FALSE, xseq = seq(-0.025,0.5, length=2)) +
+  labs(title = "Absolute Mobility at the 25th Percentile by Incarceration Rate for White Males in Washington, DC", y = "Mean Income Percentile for White Males", x = "Fraction of the White Male Population Incarcerated on April 1, 2010") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+# Fraction of Population Incarcerated White Females
+ggplot(data = DC_atlas,aes(x = jail_white_female_p25, y = kir_white_female_p25)) +
+  stat_binmean(n=50) +
+  stat_smooth(method = "lm", se = FALSE, xseq = seq(-0.75,1, length=2)) +
+  labs(title = "Absolute Mobility at the 25th Percentile by Incarceration Rate for White Females in Washington, DC", y = "Mean Income Percentile for White Females", x = "Fraction of the White Female Population Incarcerated on April 1, 2010") + 
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+```
+```{r disag cov coefficient}
+cor_coeff_jail_blk_male <- cor(DC_atlas$kir_black_male_p25, DC_atlas$jail_black_male_p25, use = "complete.obs")
+cor_coeff_jail_blk_female <- cor(DC_atlas$kir_black_female_p25, DC_atlas$jail_black_female_p25, use = "complete.obs")
+
+cor_coeff_jail_hisp_male <- cor(DC_atlas$kir_hisp_male_p25, DC_atlas$jail_hisp_male_p25, use = "complete.obs")
+cor_coeff_jail_hisp_female <- cor(DC_atlas$kir_asian_female_p25, DC_atlas$jail_hisp_female_p25, use = "complete.obs")
+
+cor_coeff_jail_wht_male <- cor(DC_atlas$kir_white_male_p25, DC_atlas$jail_white_male_p25, use = "complete.obs")
+cor_coeff_jail_wht_female <- cor(DC_atlas$kir_white_female_p25, DC_atlas$jail_white_female_p25, use = "complete.obs")
+```
 
 
 
