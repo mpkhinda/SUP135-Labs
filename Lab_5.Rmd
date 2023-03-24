@@ -1,0 +1,178 @@
+---
+title: "HKS SUP-135 Lab 5: Evaluating Education Policy using Regression Discontinuity Design"
+author: "Matt Khinda"
+date: "3/24/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# Settings for PDF output
+knitr::opts_chunk$set(echo = TRUE) 
+knitr::opts_chunk$set(fig.width=12, fig.height=5.5, fig.align = "center") 
+
+# Require packages and install and load if not already
+if (!require(haven)) install.packages("haven"); library(haven)
+if (!require(tidyverse)) install.packages("tidyverse"); library(tidyverse)
+if (!require(ggplot2)) install.packages("ggplot2"); library(ggplot2)
+if (!require(statar)) install.packages("statar"); library(statar)
+if (!require(here)) install.packages("here"); library(here)
+if (!require(sandwich)) install.packages("sandwich"); library(sandwich)
+if (!require(lmtest)) install.packages("lmtest"); library(lmtest)
+if (!require(rdrobust)) install.packages("rdrobust"); library(rdrobust)
+if (!require(plm)) install.packages("plm"); library(plm)
+
+# Clear workspace
+rm(list=ls())
+cat('\014')
+```
+
+```{r laod data, include=FALSE}
+probation <- read_dta(here("datasets", "probation.dta"))
+```
+
+## Question 1: Limitations of Direct Comparison
+
+A regression discontinuity design relies on the identification assumption that the sample observations on either side of the threshold are nearly identical and thus directly comparable. This is a plausible assumption when looking at those just above and just below the cut-off, however the further from the threshold one looks the less this assumption is likely to hold. In this study of probation, for example, we can reasonably assume that a student who earned a 1.59 GPA is not fundamentally different to one who earned a 1.61 GPA, while students who earned a 0.6 GPA are possibly quite different from those who earned a 2.6 GPA in terms of academic motivation or other potential confounding variables. Direct comparison of all students above to all students below the threshold would include far too many of these dissimilar students for the comparison to meaningfully attribute any kind of causal effect to the use of an academic probation policy.  
+
+
+## Question 2: Running Variable
+
+In this research design, the running variable is GPA which ultimately determines whether or not a student ends up on probation (treatment group) or not (control group).
+
+
+## Question 3: Predetermined Characteristics Plots
+
+#### 3a: Binned Scatter Plots
+
+```{r bin_scatter_1, message = FALSE, warning = FALSE}
+## Calculate distance from threshold
+probation$dist_from_cut <- probation$GPA - 1.6
+
+## Create boolean above threshold variable
+probation$above_threshold <- ifelse(probation$dist_from_cut >= 0, 1, 0)
+
+## Subset dataset for bandwidth
+probation_narrow <- subset(probation, dist_from_cut<=1.2 & dist_from_cut>=-1.2)
+
+## Plot discontinuity of high-school grade percentile rank
+rdplot(y = probation_narrow$hsgrade_pct, 
+       x = probation_narrow$dist_from_cut,
+       c = 0, 
+       p = 1,
+       nbins = 20,
+       x.label = "Distance from GPA Cut-off (1.60)",
+       y.label = "High School Grade Percentile Rank",
+       title = "Smoothness Test: High School Grade Percentile Rank"
+       )
+
+## Plot discontinuity of age at entry
+rdplot(y = probation_narrow$age_at_entry, 
+       x = probation_narrow$dist_from_cut,
+       c = 0, 
+       p = 1,
+       nbins = 20,
+       x.label = "Distance from GPA Cut-off (1.60)",
+       y.label = "Age at Entry",
+       title = "Smoothness Test: Age at Entry"
+       )
+
+## Plot discontinuity of age at entry
+rdplot(y = probation_narrow$bpl_north_america, 
+       x = probation_narrow$dist_from_cut,
+       c = 0, 
+       p = 1,
+       nbins = 20,
+       x.label = "Distance from GPA Cut-off (1.60)",
+       y.label = "Of North American Origin",
+       title = "Smoothness Test: North American Origin"
+       )
+
+```
+
+As we can see in the three plots above, the predetermined characteristics exhibit low discontinuity at the threshold. This is a strong validation of the assumption underlying the regression discontinuity design.
+
+
+#### 3b: Histograms
+
+```{r hist_1}
+ggplot(probation_narrow) + 
+  geom_histogram(aes(x = dist_from_cut, y = ..density..), bins = 600) + 
+  geom_vline(xintercept = 0, color = "blue")
+```
+
+As observed in the density historgram, there is not a notable jump in density around the threshold which suggest that bunching has not occured. 
+
+
+## Question 4: Effect of Probation on X
+
+```{r discont_1}
+
+## Plot discontinuity of graduation rates
+rdplot(y = probation_narrow$gradin4, 
+       x = probation_narrow$dist_from_cut,
+       c = 0, 
+       p = 1,
+       x.label = "Distance from GPA Cut-off (1.60)",
+       y.label = "Graduated in 4 Years"
+       )
+
+```
+
+## Question 5: A
+
+#### 5a: A
+
+```{r discont_1}
+
+probation_below <- subset(probation_narrow, above_threshold == 0)
+
+
+model_1 <- lm(gradin4 ~ GPA, data = probation_below)
+pred_1 <- model_1$coefficients[1] + model_1$coefficients[2]*1.6
+
+```
+
+#### 5b: A
+
+```{r discont_2}
+
+probation_above <- subset(probation_narrow, above_threshold == 1)
+
+model_2 <- lm(gradin4 ~ GPA, data = probation_above)
+pred_2 <- model_2$coefficients[1] + model_2$coefficients[2]*1.6
+
+
+
+```
+
+#### 5c: A
+```{r}
+
+discontinuity <- pred_2-pred_1
+
+```
+
+
+## Question 6: A
+
+```{r}
+
+model_3 <- lm(gradin4 ~ above_threshold + dist_from_cut + above_threshold*dist_from_cut, data = probation_narrow)
+coeftest(model_3, vcov = vcovHC(model_3, type = "HC1"))
+```
+
+
+
+## Question 7: A
+
+
+
+
+## Question 8: Program Effectiveness
+
+No and is detrimental
+
+
+
+
+
