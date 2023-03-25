@@ -7,7 +7,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 # Settings for PDF output
-knitr::opts_chunk$set(echo = TRUE) 
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE) 
 knitr::opts_chunk$set(fig.width=12, fig.height=5.5, fig.align = "center") 
 
 # Require packages and install and load if not already
@@ -77,19 +77,19 @@ rdplot(y = probation_narrow$age_at_entry,
        )
 
 ## Plot discontinuity of age at entry
-rdplot(y = probation_narrow$bpl_north_america, 
+rdplot(y = probation_narrow$totcredits_year1, 
        x = probation_narrow$dist_from_cut,
        c = 0, 
        p = 1,
        nbins = 20,
        x.label = "Distance from GPA Cut-off (1.60)",
-       y.label = "Of North American Origin",
-       title = "Smoothness Test: North American Origin"
+       y.label = "Total Credits Taken in First Year",
+       title = "Smoothness Test: Credits Taken in First Year"
        )
 
 ```
 
-As we can see in the three plots above, the predetermined characteristics exhibit low discontinuity at the threshold. This is a strong validation of the assumption underlying the regression discontinuity design.
+As shown in the three plots above, the predetermined characteristics of high school grade percentile (hsgrade_pct), age at entry (age_at_entry), and total credits attempted in the first year (totcredits_year1) exhibit low discontinuity at the threshold. This is a strong validation of the assumption underlying the regression discontinuity design. 
 
 
 #### 3b: Histograms
@@ -100,12 +100,12 @@ ggplot(probation_narrow) +
   geom_vline(xintercept = 0, color = "blue")
 ```
 
-As observed in the density historgram, there is not a notable jump in density around the threshold which suggest that bunching has not occured. 
+As observed in the density histogram, there is not a notable jump in density around the threshold which suggests that there is not bunching around the cut-off. 
 
 
-## Question 4: Effect of Probation on X
+## Question 4: Effect of Probation on Graduation Rates
 
-```{r discont_1}
+```{r discont_plot}
 
 ## Plot discontinuity of graduation rates
 rdplot(y = probation_narrow$gradin4, 
@@ -113,64 +113,80 @@ rdplot(y = probation_narrow$gradin4,
        c = 0, 
        p = 1,
        x.label = "Distance from GPA Cut-off (1.60)",
-       y.label = "Graduated in 4 Years"
+       y.label = "Graduated in 4 Years",
+       title = "Effect of Probation on Likelihood of Graduation in 4 years"
        )
 
 ```
 
-## Question 5: A
+## Question 5: Quantifying Discontinuity
 
-#### 5a: A
+#### 5a: Predicted Value at the Threshold for Treatment Group Regression
 
 ```{r discont_1}
-
+# subset the data only to include those in the bandwidth and below the cut-off
 probation_below <- subset(probation_narrow, above_threshold == 0)
-
 
 model_1 <- lm(gradin4 ~ GPA, data = probation_below)
 pred_1 <- model_1$coefficients[1] + model_1$coefficients[2]*1.6
 
+cat("The predicted value at the threshold for the linear model based on the 
+    observations below the cut-off (on probation) is", pred_1)
 ```
 
-#### 5b: A
+#### 5b: Predicted Value at the Threshold for Control Group Regression
 
 ```{r discont_2}
-
+# subset the data only to include those in the bandwidth and above the cut-off
 probation_above <- subset(probation_narrow, above_threshold == 1)
 
 model_2 <- lm(gradin4 ~ GPA, data = probation_above)
 pred_2 <- model_2$coefficients[1] + model_2$coefficients[2]*1.6
 
+cat("The predicted value at the threshold for the linear model based on the 
+    observations above the cut-off (not on probation) is", pred_2)
+```
 
+#### 5c: Difference in Predicted Values
+
+```{r discont_3}
+# calculate difference in predicted values
+discont <- pred_2-pred_1
+
+cat("The difference between the predicted values at the threshold is", discont)
 
 ```
 
-#### 5c: A
-```{r}
 
-discontinuity <- pred_2-pred_1
+## Question 6: Multivariate Regression
 
+```{r multivariate_reg}
+
+model_3 <- lm(gradin4 ~ above_threshold + dist_from_cut + 
+                above_threshold*dist_from_cut, data = probation_narrow)
+coeftest <- coeftest(model_3, vcov = vcovHC(model_3, type = "HC1"))
+betaRD <- coeftest[2,1]
+
+cat("The coefficient beta_rd from the multivariate regression is", betaRD, "which is 
+    exactly equaly to the difference in predicted values above.")
 ```
 
+## Question 7: Statistical Significance Using Standard Error
 
-## Question 6: A
+```{r stat_sig}
+stdErr <- coeftest[2,2]
+conf_upper <- betaRD + 1.96*stdErr
+conf_lower <- betaRD - 1.96*stdErr
 
-```{r}
+cat("The 95% confidence interval for the effect is between", conf_lower, "and", conf_upper, "
+    which does not include 0, indicating that it is statistically significant.")
 
-model_3 <- lm(gradin4 ~ above_threshold + dist_from_cut + above_threshold*dist_from_cut, data = probation_narrow)
-coeftest(model_3, vcov = vcovHC(model_3, type = "HC1"))
 ```
-
-
-
-## Question 7: A
-
-
 
 
 ## Question 8: Program Effectiveness
 
-No and is detrimental
+Based on the regression discontinuity analysis, it is clear that the use of a probation program is not only ineffective at improving graduation rates within 4 years, but that it is actively detrimental to those students' graduation rates. This can be seen in the plot in Question 4 and in the values found in both Questions 5 and 6 where the effect of being above the threshold and not on probation increases the likelihood of graduation within 4 years by 4 percentage points. 
 
 
 
