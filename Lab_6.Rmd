@@ -1,0 +1,103 @@
+---
+title: "HKS SUP-135 Lab 6: Predicting Social Mobility using Trees and Regression"
+author: "Matt Khinda"
+date: "3/31/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# Settings for PDF output
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE) 
+knitr::opts_chunk$set(fig.width=12, fig.height=5.5, fig.align = "center") 
+
+# Require packages and install and load if not already
+if (!require(haven)) install.packages("haven"); library(haven)
+if (!require(tidyverse)) install.packages("tidyverse"); library(tidyverse)
+if (!require(ggplot2)) install.packages("ggplot2"); library(ggplot2)
+if (!require(statar)) install.packages("statar"); library(statar)
+if (!require(here)) install.packages("here"); library(here)
+if (!require(sandwich)) install.packages("sandwich"); library(sandwich)
+if (!require(lmtest)) install.packages("lmtest"); library(lmtest)
+if (!require(rdrobust)) install.packages("rdrobust"); library(rdrobust)
+if (!require(plm)) install.packages("plm"); library(plm)
+if (!require(rpart)) install.packages("rpart"); library(rpart)
+
+# Clear workspace
+rm(list=ls())
+cat('\014')
+```
+
+
+```{r laod data, include=FALSE}
+mobility <- read_dta(here("datasets", "mobility.dta"))
+```
+
+## Question 1: Why Divide Data?
+
+To avoid overfitting, creating a model that perfectly predicts the the training data but ends up being useless in the
+
+
+
+## Question 2: Random Assignment 
+
+####2a: Setting the Random Seed
+```{r rand seed}
+HUID <- 41531460
+set.seed(HUID)
+```
+
+####2b: Assigning Data to Training Set
+```{r rand assign}
+# assign random number 
+mobility$rand_num <- runif(length(mobility$cz))
+mobility$train_flag <- ifelse(mobility$rand_num>= 0.5, 1, 0) 
+```
+
+## Question 3: Subsetting the Data
+```{r subset}
+training_set <- subset(mobility, mobility$train_flag == 1)
+test_set <- subset(mobility, mobility$train_flag ==0)
+
+```
+
+The training dataset contains `r nrow(training_set)` observations, while the test dataset contains `r nrow(test_set)`.
+
+### Question 4: Using Linear Regression to Predict Upward Mobility
+
+#### 4a: Multivariate Regression
+```{r lm1}
+model_1 <- lm(kfr_pooled_pooled_p25 ~ mean_commutetime2000 + poor_share2000 + popdensity2000, data=training_set) 
+# Display model results
+summary(model_1)
+```
+
+#### 4b: Predicting Mobility in Milwaukee, WI
+```{r mil}
+#subset data for milwaukee
+milwaukee <- subset(mobility, cz == 24100)
+#use previous model to predict mobility
+milwaukee_pred = 61.29 +
+                 (-0.7245*milwaukee$mean_commutetime2000) +
+                 (-17.32*milwaukee$poor_share2000) + 
+                 (0.001551*milwaukee$popdensity2000)
+#calc prediction error
+mil_pred_error = milwaukee$kfr_pooled_pooled_p25 - milwaukee_pred
+```
+
+#### 4c: OLS Predicitons for Training Data
+```{r train_ols}
+
+```
+
+
+
+#### 4d: OLS Predicitons for Test Data
+```{r test_ols}
+
+```
+
+
+
+
+
+
