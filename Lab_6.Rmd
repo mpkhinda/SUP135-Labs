@@ -16,9 +16,6 @@ if (!require(tidyverse)) install.packages("tidyverse"); library(tidyverse)
 if (!require(ggplot2)) install.packages("ggplot2"); library(ggplot2)
 if (!require(statar)) install.packages("statar"); library(statar)
 if (!require(here)) install.packages("here"); library(here)
-if (!require(sandwich)) install.packages("sandwich"); library(sandwich)
-if (!require(lmtest)) install.packages("lmtest"); library(lmtest)
-if (!require(rdrobust)) install.packages("rdrobust"); library(rdrobust)
 if (!require(plm)) install.packages("plm"); library(plm)
 if (!require(rpart)) install.packages("rpart"); library(rpart)
 
@@ -34,44 +31,43 @@ mobility <- read_dta(here("datasets", "mobility.dta"))
 
 ## Question 1: Why Divide Data?
 
-To avoid overfitting, creating a model that perfectly predicts the the training data but ends up being useless in the
-
+Dividing data allows us to both train a model on a large enough sample size while also reserving the ability to test it on out-of-sample data it has never seen before. Doing this acts as a barometer for how the model would likely perform with new data for which we don't have the validating information. If we did not divide the data, and instead trained a model on the full sample, it would end up perfectly predicting the the training data but being useless in the real world. 
 
 
 ## Question 2: Random Assignment 
 
-####2a: Setting the Random Seed
+#### 2a: Setting the Random Seed
 ```{r rand seed}
 HUID <- 41531460
 set.seed(HUID)
 ```
 
-####2b: Assigning Data to Training Set
+#### 2b: Assigning Data to Training Set
 ```{r rand assign}
 # assign random number 
 mobility$rand_num <- runif(length(mobility$cz))
 mobility$train_flag <- ifelse(mobility$rand_num>= 0.5, 1, 0) 
 ```
 
+The training dataset contains `r nrow(subset(mobility, mobility$train_flag == 1))` observations, while the test dataset contains `r nrow(subset(mobility, mobility$train_flag ==0))`.
+
 ## Question 3: Subsetting the Data
 ```{r subset}
 training_set <- subset(mobility, mobility$train_flag == 1)
 test_set <- subset(mobility, mobility$train_flag ==0)
-
 ```
-
-The training dataset contains `r nrow(training_set)` observations, while the test dataset contains `r nrow(test_set)`.
 
 ### Question 4: Using Linear Regression to Predict Upward Mobility
 
 #### 4a: Multivariate Regression
 ```{r lm1}
-model_1 <- lm(kfr_pooled_pooled_p25 ~ mean_commutetime2000 + poor_share2000 + popdensity2000, data=training_set) 
+model_1 <- lm(kfr_pooled_pooled_p25 ~ mean_commutetime2000 
+              + poor_share2000 + popdensity2000, data=training_set) 
 # Display model results
 summary(model_1)
 ```
 
-#### 4b: Predicting Mobility in Milwaukee, WI
+#### 4b: Predicting Mobility in Milwaukee, WI  
 ```{r mil}
 #subset data for milwaukee
 milwaukee <- subset(mobility, cz == 24100)
@@ -84,17 +80,116 @@ milwaukee_pred = 61.29 +
 mil_pred_error = milwaukee$kfr_pooled_pooled_p25 - milwaukee_pred
 ```
 
+Using the multivariate regression above to predict economic mobility in Milwaukee, WI results in a prediciton error of `r mil_pred_error`.
+
 #### 4c: OLS Predicitons for Training Data
 ```{r train_ols}
-
+y_train_predictions_ols <- predict(model_1, newdata=training_set)
 ```
-
-
 
 #### 4d: OLS Predicitons for Test Data
 ```{r test_ols}
-
+y_test_predictions_ols <- predict(model_1, newdata=test_set)
 ```
+
+#### 4e: RMSPE in Training and Test Datasets
+```{r rmspe_ols}
+OLS_performance_train <- (training_set$kfr_pooled_pooled_p25 - y_train_predictions_ols)^2
+OLS_performance_test <- (test_set$kfr_pooled_pooled_p25 - y_test_predictions_ols)^2
+
+# calculate the root mean squared prediction error
+rmspe_train_ols <- sqrt(mean(OLS_performance_train, na.rm=TRUE))
+rmspe_test_ols <- sqrt(mean(OLS_performance_test, na.rm=TRUE))
+```
+
+The root mean squared prediction error in the training dataset is `r rmspe_train_ols`, while in the test dataset it is `r rmspe_test_ols`.
+
+#### 4f: Comparing Prediction Errors
+
+When comparing the root mean squared prediction errors, we can see that the difference is minimal. This suggests that the model predicts almost equally well for the training and the test datasets, meaning that it has not been overfit.
+
+
+## Question 5: Using a Decision Tree to Predict Upward Mobility
+
+#### 5a: Creating the Decision Tree
+```{r tree_1}
+mobilitytree <- rpart(kfr_pooled_pooled_p25 ~ mean_commutetime2000 + 
+                      poor_share2000 + popdensity2000, 
+                      data=training_set, 
+                      maxdepth = 3, 
+                      cp=0) 
+```
+
+#### 5b: Visualizing the Tree and Using it for Milwaukee Prediction
+```{r vis tree}
+# Visualize tree with labels
+plot(mobilitytree, margin = 0.2) 
+text(mobilitytree, cex = 1) 
+```
+
+Based on the values for Milwaukee, WI we can follow the binary tree to arrive at a predicted value. To do that, first we look at popdensity2000 which for Milwaukee is `r milwaukee$popdensity2000` so we follow the tree to the left because it is greater than the threshold. Then we look at mean_commutetime2000 which for Milwaukee is `r milwaukee$mean_commutetime2000` so we again follow the tree to the left because it is greater than the threshold. Finally, we look at poor_share2000 which for Milwaukee is `r milwaukee$poor_share2000` and go to the right this time because it is below the threshold. This path leads us to the predicted value of 40.31 which 
+
+
+#### 5c: Decision Tree Predictions for Training Dataset
+```{r tree_train}
+y_train_predictions_tree <- predict(mobilitytree, newdata=training_set)
+```
+
+#### 5d: Decision Tree Predictions for Test Dataset
+```{r tree_test}
+y_test_predictions_tree <- predict(mobilitytree, newdata=test_set)
+```
+
+#### 5e: 
+```{r rmspe_tree}
+tree_performance_train <- (training_set$kfr_pooled_pooled_p25 - y_train_predictions_tree)^2
+tree_performance_test <- (test_set$kfr_pooled_pooled_p25 - y_test_predictions_tree)^2
+
+# calculate the root mean squared prediction error
+rmspe_train_tree <- sqrt(mean(tree_performance_train, na.rm=TRUE))
+rmspe_test_tree <- sqrt(mean(tree_performance_test, na.rm=TRUE))
+```
+
+The root mean squared prediction error in the training dataset is `r rmspe_train_tree`, while in the test dataset it is `r rmspe_test_tree`.
+
+
+#### 5f: RMSPE in Training and Test Datasets
+
+When comparing the root mean squared prediction errors from the decision tree, we can see that the prediction error for the test is slightly larger than for the training set. 
+
+## Question 6: Overfitting 
+```{r overfit}
+big_tree <-rpart(kfr_pooled_pooled_p25 ~ mean_commutetime2000 + 
+                 poor_share2000 + popdensity2000, 
+                 data=training_set, 
+                 maxdepth = 30, 
+                 cp=0,  
+                 minsplit = 1, 
+                 minbucket = 1)
+
+
+y_train_predictions_big_tree <- predict(big_tree, newdata=training_set)
+y_test_predictions_big_tree <- predict(big_tree, newdata=test_set)
+
+big_tree_performance_train <- (training_set$kfr_pooled_pooled_p25 - y_train_predictions_big_tree)^2
+big_tree_performance_test <- (test_set$kfr_pooled_pooled_p25 - y_test_predictions_big_tree)^2
+
+# calculate the root mean squared prediction error
+rmspe_train_big_tree <- sqrt(mean(big_tree_performance_train, na.rm=TRUE))
+rmspe_test_big_tree <- sqrt(mean(big_tree_performance_test, na.rm=TRUE))
+
+# Visualize tree with labels
+plot(big_tree, margin = 0.2) 
+text(big_tree, cex = 0.5) 
+```
+
+In this tree of depth 30, the root mean squared prediction error in the training dataset is `r rmspe_train_big_tree`, while in the test dataset it is `r rmspe_test_big_tree`. Here we can see that the model perfectly predicts the training data, but has a larger prediction error in the test data than the smaller tree used above. This is an example of overfitting. 
+
+## Question 7: Comparing Predictive Models
+
+By looking at the root mean squared prediction errors of the three different models used, we can determine that, unsurprisingly, the decision tree of depth 30 was the most accurate predictor for the training dataset. However, the decision tree of depth 3 was the best predictor for the data in the test set. 
+
+
 
 
 
