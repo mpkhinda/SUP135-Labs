@@ -16,8 +16,6 @@ if (!require(tidyverse)) install.packages("tidyverse"); library(tidyverse)
 if (!require(ggplot2)) install.packages("ggplot2"); library(ggplot2)
 if (!require(statar)) install.packages("statar"); library(statar)
 if (!require(here)) install.packages("here"); library(here)
-if (!require(plm)) install.packages("plm"); library(plm)
-if (!require(rpart)) install.packages("rpart"); library(rpart)
 
 # Clear workspace
 rm(list=ls())
@@ -78,7 +76,7 @@ Cross-validation helps address the issue of overfitting by dividing the training
 
 ## Question 4: Advantages of Random Forests
 
-
+Random forests improve on the predictive power of decision tress by growing a much larger number of trees with a much greater depth than we could with a single tree. Each individual tree is trained on a different, randomly generated bootstrap sample that mimics the variability we would expect in a real-world out-of-sample test. By bagging, or taking the average prediction from the various decision trees, the risk of overfitting is eliminated while preserving the low bias from the larger tree depths. 
 
 
 ## Question 5: Random Forest with 1000 Trees (2 predictors)
