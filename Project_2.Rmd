@@ -1,0 +1,31 @@
+---
+title: 'HKS SUP-135 Project Part 2: Stories from the Opportunity Atlas'
+author: "Matt Khinda"
+date: "4/8/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# Settings for PDF output
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE) 
+knitr::opts_chunk$set(fig.width=12, fig.height=7, fig.align = "center") 
+
+# Require packages and install and load if not already
+if (!require(haven)) install.packages("haven"); library(haven)
+if (!require(tidyverse)) install.packages("tidyverse"); library(tidyverse)
+if (!require(ggplot2)) install.packages("ggplot2"); library(ggplot2)
+if (!require(statar)) install.packages("statar"); library(statar)
+if (!require(here)) install.packages("here"); library(here)
+if (!require(htmltools)) install.packages("htmltools"); library(htmltools)
+if (!require(sandwich)) install.packages("sandwich"); library(sandwich)
+if (!require(lmtest)) install.packages("lmtest"); library(lmtest)
+
+# Clear workspace
+rm(list=ls())
+cat('\014')
+```
+
+```{r load data, include=FALSE}
+atlas <- read_dta(here("datasets", "atlas.dta"))
+```
+
