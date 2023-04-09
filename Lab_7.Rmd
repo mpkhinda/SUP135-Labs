@@ -1,0 +1,39 @@
+---
+title: 'HKS SUP-135 Lab 7: Predicting Social Mobility using Cross Validation and Random Forests'
+author: "Matt Khinda"
+date: "4/10/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# Settings for PDF output
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE) 
+knitr::opts_chunk$set(fig.width=12, fig.height=5.5, fig.align = "center") 
+
+# Require packages and install and load if not already
+if (!require(haven)) install.packages("haven"); library(haven)
+if (!require(tidyverse)) install.packages("tidyverse"); library(tidyverse)
+if (!require(ggplot2)) install.packages("ggplot2"); library(ggplot2)
+if (!require(statar)) install.packages("statar"); library(statar)
+if (!require(here)) install.packages("here"); library(here)
+if (!require(plm)) install.packages("plm"); library(plm)
+if (!require(rpart)) install.packages("rpart"); library(rpart)
+
+# Clear workspace
+rm(list=ls())
+cat('\014')
+```
+
+
+```{r load data, include=FALSE}
+
+```
+
+
+
+
+
+```{r rand seed}
+HUID <- 41531460
+set.seed(HUID)
+```
