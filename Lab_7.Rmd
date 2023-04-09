@@ -26,14 +26,98 @@ cat('\014')
 
 
 ```{r load data, include=FALSE}
-
+atlas_train <- read_dta(here("datasets", "atlas_training.dta"))
+atlas_lockbox <- read_dta(here("datasets", "atlas_lockbox.dta"))
 ```
 
-
-
-
-
-```{r rand seed}
+```{r data setup}
+# Set random seed 
 HUID <- 41531460
 set.seed(HUID)
+
+# Store predictor variables
+pred_vars <- colnames(atlas_train[,grep("^[P_]", names(atlas_train))])
+
+# Create a training set with only predictors and kfr_pooled_pooled_p25
+training_set <- subset(atlas_train, training == 1, pred_vars)
+training_set$kfr_pooled_pooled_p25 <- atlas_train[atlas_train$training==1,]$kfr_pooled_pooled_p25
 ```
+
+
+## Question 1: For Loops and Steady States
+
+```{r for_loop}
+
+```
+
+## Question 2: The Purpose of Cross-Validation 
+
+Cross-validation helps address the issue of overfitting by dividing the training data randomly into folds, which are iteratively used to evaluate trees of varying depths that have been trained on the other folds. This creates psuedo out-of-sample tests that help determine the appropriate depth of a tree without the risk of overfititng the models to the noise in the full dataset. Practically speaking, the appropriate tree depth is based on the combined root mean squared prediction error for all of trees of that depth across all iterations of the folds. 
+
+## Question 3: Five-Fold Cross Validation
+
+#### 3a: CV RMSE Plot
+```{r cv_rmse}
+
+```
+
+
+#### 3b: Optimal Tree Depth
+
+
+#### 3c: Estimate Tree Using the Full Dataset
+```{r full_set_tree}
+
+```
+
+#### 3d: Predictions in the Training Sample
+```{r train_predictions}
+
+```
+
+
+## Question 4: Advantages of Random Forests
+
+
+
+
+## Question 5: Random Forest with 1000 Trees (2 predictors)
+```{r rand_forest_2_pred}
+
+```
+
+
+## Question 6: Random Forest with 1000 Trees (All predictors)
+```{r rand_forest_all_pred}
+
+```
+
+
+## Question 7: Identifying Important Predictors in a Random Forest
+```{r key_pred_rand_forest}
+
+```
+
+
+## Question 8: RMSPE and Model Comparison
+```{r rmspe}
+
+```
+
+
+## Question 9: Evaluating Models Against Lock Box Data
+```{r lockbox_test}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
