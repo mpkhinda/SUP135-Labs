@@ -16,6 +16,8 @@ if (!require(tidyverse)) install.packages("tidyverse"); library(tidyverse)
 if (!require(ggplot2)) install.packages("ggplot2"); library(ggplot2)
 if (!require(statar)) install.packages("statar"); library(statar)
 if (!require(here)) install.packages("here"); library(here)
+if (!require(rpart)) install.packages("rpart"); library(rpart)
+if (!require(randomForest)) install.packages("randomForest"); library(randomForest)
 
 # Clear workspace
 rm(list=ls())
@@ -45,8 +47,22 @@ training_set$kfr_pooled_pooled_p25 <- atlas_train[atlas_train$training==1,]$kfr_
 ## Question 1: For Loops and Steady States
 
 ```{r for_loop}
+# Initialize variables for regression
+gens <- seq(1,7,1)
+alpha <- 36.14
+beta <- 0.26
+parent_rank <- 36.17
 
+for (j in gens){
+  kid_rank = alpha + beta * parent_rank
+  cat(paste0("In generation ", j, ", parent_rank = ", 
+              parent_rank, ", child_rank = ", kid_rank), sep = "
+      ")
+  parent_rank <- kid_rank
+}
 ```
+
+Using the rank-rank regression for economic outcomes of Hispanic children from Chetty et al. (2020), with the average starting parent rank of the 36.17th  percentile, the stable state after 7 generations appears to be around the 48.83th  percentile for an improvement of about 12 percentiles from the current average.
 
 ## Question 2: The Purpose of Cross-Validation 
 
@@ -54,62 +70,186 @@ Cross-validation helps address the issue of overfitting by dividing the training
 
 ## Question 3: Five-Fold Cross Validation
 
-#### 3a: CV RMSE Plot
-```{r cv_rmse}
+```{r five_fold}
+n <- nrow(training_set) 
+K <- 5 # num folds
+B <- seq(1,20,1) # Test tree depths from 1 to 20
 
+# Copy training data for use inside the loop
+cv <- training_set
+
+# Randomly assign fold memberships to each row
+cv$fold_id <- rep(1:K,each=ceiling(n/K))[sample(1:n)]
+
+# Create an empty data frame to store future results
+OOS <- data.frame(fold=rep(NA,K*length(B) ), 
+                  squarederror=rep(NA,K*length(B) ), 
+                  maxdepth=rep(NA,K*length(B) )) 
+
+# Start at row 0
+row <- 0
+
+for(j in B){ 
+  for(k in 1:K){ 
+    row <- row + 1 #increment row
+    cv_train <- subset(cv, fold_id != k) #subset to include all but fold k
+    cv_fold <- subset(cv, fold_id == k) #subset to include only fold k 
+    
+    # Define tree parameters and grow based on training set
+    cvtree <- rpart(kfr_pooled_pooled_p25 ~ P_12 + P_47, 
+                    data = cv_train,
+                    maxdepth = c(j), 
+                    cp=0) 
+    
+    # Apply trees to fold
+    predfull <- predict(cvtree, newdata = cv_fold)
+    
+    # Calculate and store prediction errors, max depth, and id for fold k
+    OOS$squarederror[row] <- sum((cv_fold$kfr_pooled_pooled_p25 - predfull)^2) 
+    OOS$maxdepth[row] <- j
+    OOS$fold[row] <- k
+    }
+  }
+
+# Display summary results
+summary(OOS)
 ```
 
 
-#### 3b: Optimal Tree Depth
+#### 3a: CV RMSE Plot
+```{r cv_rmse}
+# Calculate combined error across folds and put in dataframe
+ssr <- tapply(OOS$squarederror, OOS$maxdepth, sum)
+ssr <- as.data.frame(ssr)
+ssr$maxdepth <- seq(1,20,1)
 
+# Calculate RMSPE as new variable
+ssr$rmse <- sqrt(ssr$ssr / nrow(training_set))
+
+# Plot resulting CV RMSPE by tree depth
+ggplot(ssr, aes(x=maxdepth,y=rmse)) +
+  geom_point() +
+  geom_line() +
+  labs(y = "Cross Validation RMSPE",
+       x = "Tree Depth")
+```
+
+#### 3b: Optimal Tree Depth
+```{r optimal_depth}
+cv_optimal_depth <- ssr$maxdepth[ssr$rmse == min(ssr$rmse)]
+```
+
+As shown in the chart above, based on the five-fold cross-validation, the optimal tree depth to reduce the root mean squared prediction error is `r cv_optimal_depth`. 
 
 #### 3c: Estimate Tree Using the Full Dataset
 ```{r full_set_tree}
+# Create new tree at optimal depth using the full training set
+tree <- rpart(kfr_pooled_pooled_p25 ~ P_12 + P_47, 
+                      data=training_set, 
+                      maxdepth = cv_optimal_depth, 
+                      cp=0) 
 
+# Plot resulting tree
+plot(tree, margin = 0.2)
+text(tree, cex = 0.5)
 ```
 
 #### 3d: Predictions in the Training Sample
 ```{r train_predictions}
-
+# Predict values for each row using new tree
+y_train_predictions_tree <- predict(tree, newdata=training_set)
 ```
 
 
 ## Question 4: Advantages of Random Forests
 
-Random forests improve on the predictive power of decision tress by growing a much larger number of trees with a much greater depth than we could with a single tree. Each individual tree is trained on a different, randomly generated bootstrap sample that mimics the variability we would expect in a real-world out-of-sample test. By bagging, or taking the average prediction from the various decision trees, the risk of overfitting is eliminated while preserving the low bias from the larger tree depths. 
-
+Random forests improve on the predictive power of decision tress by growing a much larger number of trees with a much greater depth than we could with a single tree. Each individual tree is trained on a different, randomly generated bootstrap sample that mimics the variability we would expect in a real-world out-of-sample test. By bagging, or taking the average prediction from the various decision trees, the risk of overfitting is eliminated while preserving the low bias from the larger tree depths. Equally, in wide datasets, to avoid over-correlation between random trees and to ensure the usefulness the average prediction, a technique called input randomization is used whereby the predictor variables in each tree are randomly selected among the full set. 
 
 ## Question 5: Random Forest with 1000 Trees (2 predictors)
 ```{r rand_forest_2_pred}
+# Generate forest of 1000 trees on two variables
+small_forest <- randomForest(kfr_pooled_pooled_p25 ~ P_12 + P_47,
+                               ntree=1000, 
+                               mtry=2,
+                               data=training_set)
 
+# Use small forest to generate predictions within training set
+y_train_predictions_smallforest <- predict(small_forest, 
+                                           newdata=training_set, 
+                                           type="response")
+
+small_forest
 ```
 
 
 ## Question 6: Random Forest with 1000 Trees (All predictors)
 ```{r rand_forest_all_pred}
+# Generate forest of 1000 trees on all variables
+large_forest <- randomForest(kfr_pooled_pooled_p25 ~ .,
+                               ntree=1000, 
+                               mtry=40,
+                               importance = T,
+                               data=training_set)
 
+# Use large forest to generate predictions within training set
+y_train_predictions_largeforest <- predict(large_forest, 
+                                           newdata=training_set, 
+                                           type="response")
+
+large_forest
 ```
 
 
 ## Question 7: Identifying Important Predictors in a Random Forest
 ```{r key_pred_rand_forest}
-
+varImpPlot(large_forest, type=1)
 ```
-
+Based on the table and plot above, the three most important predictor variables are P_56 (Average number of mentally unhealthy days per month for people over 18 years old), P_85 (Fraction of the population that is Roman Catholic), and P_37 (Share of the population identifying as Black in 2000). 
 
 ## Question 8: RMSPE and Model Comparison
 ```{r rmspe}
+RMSPE <- matrix(0, 3, 1)
+RMSPE[1] <- sqrt(mean((training_set$kfr_pooled_pooled_p25 - 
+                         y_train_predictions_tree)^2, na.rm=TRUE))
+RMSPE[2] <- sqrt(mean((training_set$kfr_pooled_pooled_p25 - 
+                         y_train_predictions_smallforest)^2, na.rm=TRUE))
+RMSPE[3] <- sqrt(mean((training_set$kfr_pooled_pooled_p25 - 
+                         y_train_predictions_largeforest)^2, na.rm=TRUE))
 
+# Display summary table of results
+knitr::kable(data.frame(RMSPE, method = c("Tree", "Small RF", "Large RF")) 
+             %>% select(method, RMSPE)) 
 ```
+
+As shown in the summary table, the large random forest is the model that predicts economic outcomes with the highest accuracy based on the available variables. This is almost certainly because of its ability to incorporate all of the predictor variables to produce its forecasts rather than just the two that were used in the single tree and small random forest. 
 
 
 ## Question 9: Evaluating Models Against Lock Box Data
 ```{r lockbox_test}
+atlas <- left_join(atlas_lockbox, atlas_train , by="geoid")
+test <- subset(atlas, training==0)
 
+#Get predictions for lock box data using 3 models
+y_test_predictions_tree <- predict(tree, newdata=test)
+y_test_predictions_smallforest <- predict(small_forest, 
+                                          newdata=test, type="response")
+y_test_predictions_largeforest  <- predict(large_forest, 
+                                           newdata=test, type="response")
+
+Test_RMSPE <- matrix(0, 3, 1)
+Test_RMSPE[1] <- sqrt(mean((test$kfr_actual - 
+                              y_test_predictions_tree)^2, na.rm=TRUE))
+Test_RMSPE[2] <- sqrt(mean((test$kfr_actual - 
+                              y_test_predictions_smallforest)^2, na.rm=TRUE))
+Test_RMSPE[3] <- sqrt(mean((test$kfr_actual - 
+                              y_test_predictions_largeforest)^2, na.rm=TRUE))
+
+# Display summary table of results
+knitr::kable(data.frame(Test_RMSPE, method = c("Tree", "Small RF", "Large RF")) 
+             %>% select(method, Test_RMSPE)) 
 ```
 
-
-
+When applied to the lock box data, the random forest remains the best predictive model of the three. Interestingly, in this case, the tree predicts slightly better than the small random forest unlike in the training dataset, though the difference is fairly small. Across all three models the error is significantly higher when applied to the test dataset as opposed to the training set, which is to be expected.
 
 
 
