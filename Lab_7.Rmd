@@ -19,7 +19,7 @@ if (!require(here)) install.packages("here"); library(here)
 if (!require(rpart)) install.packages("rpart"); library(rpart)
 if (!require(randomForest)) install.packages("randomForest"); library(randomForest)
 
-# Clear workspace
+# Clear workspace 
 rm(list=ls())
 cat('\014')
 ```
