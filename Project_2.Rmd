@@ -19,6 +19,8 @@ if (!require(here)) install.packages("here"); library(here)
 if (!require(htmltools)) install.packages("htmltools"); library(htmltools)
 if (!require(sandwich)) install.packages("sandwich"); library(sandwich)
 if (!require(lmtest)) install.packages("lmtest"); library(lmtest)
+if (!require(sf)) install.packages("sf"); library(sf)
+if (!require(ggspatial)) install.packages("ggspatial"); library(ggspatial)
 
 # Clear workspace
 rm(list=ls())
@@ -27,5 +29,31 @@ cat('\014')
 
 ```{r load data, include=FALSE}
 atlas <- read_dta(here("datasets", "atlas.dta"))
+streets <- read_sf(here("datasets", "Street_Centerlines_1999/Street_Centerlines_1999.shp"))
+tract_geom <- read_sf(here("datasets", "Census_Tracts_in_2010/Census_Tracts_in_2010.shp")) %>%
+  select(GEOID, geometry)
 ```
+
+```{r map test}
+# test plot to check that streets and tracts are using 
+# the same coordinate projection system
+ggplot()+
+  geom_sf(data = tract_geom) +
+  geom_sf(data = streets) +
+  theme_void()
+```
+
+```{r select segments by tract}
+
+
+
+
+```
+
+```{r determine tract street entropy}
+
+
+
+```
+
 

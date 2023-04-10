@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+    <idinfo>
+        <citation>
+            <citeinfo>
+                <origin/>
+                <origin/>
+                <origin/>
+                <pubdate>20010331</pubdate>
+                <title>Street Centerlines - 1999</title>
+                <edition>1st edition</edition>
+                <geoform>vector digital data</geoform>
+                <pubinfo>
+                    <pubplace/>
+                    <publish>Office of the Chief Technology Officer</publish>
+                </pubinfo>
+            </citeinfo>
+        </citation>
+        <descript>
+            <abstract>Street Centerlines captured in 1999. Contract NCPC 93-02. This document describes the planimetric map production for the 350 tiles located in Washington DC and the surrounding states of MD and VA.</abstract>
+            <purpose>This data set was created to act as a basis for public and private institutions to improve their policy and decision making; promote economic development; and enhance the quality of life for residents and businesses.</purpose>
+        </descript>
+        <status>
+            <progress>Complete</progress>
+            <update>Unknown</update>
+        </status>
+        <spdom>
+            <bounding>
+                <westbc>-77.119396</westbc>
+                <eastbc>-76.909401</eastbc>
+                <northbc>38.995255</northbc>
+                <southbc>38.799718</southbc>
+            </bounding>
+        </spdom>
+        <keywords>
+            <theme>
+                <themekt>None</themekt>
+                <themekey>Geographic Information System</themekey>
+                <themekey>Planimetrics</themekey>
+            </theme>
+            <theme>
+                <themekt>ISO 19115 Topic Categories</themekt>
+                <themekey>planningCadastre</themekey>
+            </theme>
+            <place>
+                <placekt>None</placekt>
+                <placekey>Washington</placekey>
+                <placekey>DC</placekey>
+                <placekey>District of Columbia</placekey>
+            </place>
+        </keywords>
+        <accconst>None</accconst>
+        <useconst>This work is licensed under a Creative Commons Attribution 4.0 International License.</useconst>
+        <ptcontac>
+            <cntinfo>
+                <cntorgp>
+                    <cntorg>D.C. Office of the Chief Technology Officer</cntorg>
+                    <cntper>GIS Data Coordinator</cntper>
+                </cntorgp>
+                <cntaddr>
+                    <addrtype>mailing and physical</addrtype>
+                    <address>200 I Street SE, 5th Floor</address>
+                    <city>Washington</city>
+                    <state>DC</state>
+                    <postal>20003</postal>
+                    <country>US</country>
+                </cntaddr>
+                <cntfax>(202) 727-5660</cntfax>
+                <cntemail>dcgis@dc.gov</cntemail>
+                <hours>8:30 am - 5 pm</hours>
+            </cntinfo>
+        </ptcontac>
+        <datacred>https://octo.dc.gov</datacred>
+    </idinfo>
+    <dataqual>
+        <attracc>
+            <attraccr>Validated by source and/or responsible agency. Attribute accuracy is tested by manual comparison of the digital orthos/aerial photography with the hard copy plots. In addition, several computer quality control programs are run on the accompanying digital data.</attraccr>
+        </attracc>
+        <logic>Validated by source and/or responsible agency. Edit/Quality Control Process in ARC/INFO The final topological structure is created and verified using ARC/INFO's Map Librarian functionality. In general, use of a map library ensures overall compliance with defined database structures and conventions, and, for this specific project, guarantees adherence to the database structure and conventions. In addition, in-house-developed ARC/INFO routines are employed for translation of vector data from a CAD to GIS environment. These routines maintain coding of all CAD data, construct both topologically clean and topologically structured data sets, and combine or separate data into the correct user-defined output data sets. For this project, for example, all CAD data are translated to ARC/INFO coverages while eliminating topological errors such as overshoots and undershoots. EDMD GIS division verifies that all vector data produced for the project meets the Graphic Data Standards, as outlined in the modification of Task 4. A combination of automated procedures and interactive processes are used. The following is a listing of AML Default Routines: QC_PROC.aml This routine will run all of the following AMLs. The &amp;run qc_proc.aml &lt;library&gt; &lt;tile&gt; &lt;layer&gt; &lt;library&gt; - The name of the map library (i.e. NCPC) &lt;tile&gt; - the tile within the map library upon which the AMLs are to run &lt;layer&gt; - the layer defined for the map library (i.e. roads) General Data Set Verification QC_DATAPROJ.aml This routine checks correctness of all projection parameters. It verifies map projection, projection zone, datum and projection units. QC_DATAEXT.aml This routine checks if all data in the selected data set are within the corresponding map sheet boundaries. QC_CORN.aml This routine checks if corner coordinates of the selected data set coincide with corner coordinates of the corresponding map sheet. QC_DATATOL.aml This routine checks mapping tolerances. Mapping tolerances implicitly define accuracy and precision of vector data. Attribute Verification QC_FEATNODE.aml, QC_FEATPNTS.aml, QC_FEATLINE.aml, QC_FEATPOLY.aml These routines check the field definitions of the selected data set and data type. QC_ATTRPNTS.aml, QC_ATTRLINE.aml, QC_ATTRPOLY.aml These routines check the attribute codes of all features in the selected data set against the range of possible attribute codes defined in the database. Topological Consistency Verification QC_DATAEDGE.aml This routine checks for spatial mismatches of linear features among adjacent map sheets. It displays any mismatch. QC_ATTREDGE.aml This routine checks for attribute mismatches of polygon features among adjacent map sheets. QC_DANGINT.aml This routine displays intersections of features within a data set such as contour data. Intersections of contour features indicate errors as contours are by definition non-intersecting isometric. This routine also displays any terminal node that is not connected to any other feature. The following is a description of the steps undertaken to inspect and verify the quality of the planimetric data. Step 1 EDMD prepares an ARC/INFO map library using the database design as developed by Dewberry &amp; Davis dated June 30, 1997. Using an ARC/INFO map library, any inconsistencies in the database are immediately apparent when loading or modifying the digital planimetric data. Step 2 Compiled data are translated to the appropriate ARC/INFO coverages and inserted into the map library. The translation procedures ensure that all codes are within the range of possible domain values. Illogical coding or configuration of features such as roads within buildings is immediately flagged. Step 3 Using the Map Librarian functionality, routines (i.e., Arc Macro Language - AML) can be automatically applied to the entire database using the Map Librarian VISIT command. Similarly, other layers are validated with the appropriate routines. Step 4 In an interactive session, using ARC/EDIT, each map library tile, including all the associated layers, is verified by an editor. Verification consists of checking spatial and attribute data. In this session, topological inconsistencies are highlighted, for example, dangling arcs, missing label points, etc. Identification of missing features or features with incorrect shape can also easily be identified through use of the 1995 orthophotos that reside in the image catalog. Step 5 Final quality control is performed in an ArcView session, again using the map library. Any missing features will be identified during this step. Generally, steps 1, 4, and 5 involve interactive quality control steps, while steps 2 and 3 are based on automated quality assurance. Step 5, as a final quality control step, includes verification of vector data to hardcopy maps.</logic>
+        <complete>Validated by source and/or responsible agency. The photogrammetric mapping is guaranteed to meet National Map Accuracy standards for digital mapping at a scale of 1 inch to 83.33 feet, which calls for 90% of well defined points to fall within 33.3 inches of true position horizontally. This does not apply to hidden features, which were inferred.</complete>
+        <posacc>
+            <horizpa>
+                <horizpar>Validated by source and/or responsible agency.</horizpar>
+            </horizpa>
+            <vertacc>
+                <vertaccr>N/A</vertaccr>
+            </vertacc>
+        </posacc>
+        <lineage>
+            <srcinfo>
+                <srccite>
+                    <citeinfo>
+                        <origin/>
+                        <pubdate>unknown</pubdate>
+                        <title>Washington DC GIS project</title>
+                        <geoform>map</geoform>
+                    </citeinfo>
+                </srccite>
+                <typesrc>CD-ROM</typesrc>
+                <srccitea>DD1</srccitea>
+                <srccontr>SIS data</srccontr>
+            </srcinfo>
+            <srcinfo>
+                <srccite>
+                    <citeinfo>
+                        <origin/>
+                        <pubdate>unknown</pubdate>
+                        <title>Washington DC GIS project</title>
+                        <geoform>map</geoform>
+                    </citeinfo>
+                </srccite>
+                <typesrc>None</typesrc>
+                <srctime>
+                    <timeinfo>
+                        <rngdates>
+                            <begdate>19990331</begdate>
+                            <enddate>19990526</enddate>
+                        </rngdates>
+                    </timeinfo>
+                    <srccurr>Ground Condition</srccurr>
+                </srctime>
+                <srccitea>EDMD2</srccitea>
+                <srccontr>Aerial Photography</srccontr>
+            </srcinfo>
+            <srcinfo>
+                <srccite>
+                    <citeinfo>
+                        <origin/>
+                        <pubdate>unknown</pubdate>
+                        <title>Washington DC GIS project</title>
+                        <geoform>map</geoform>
+                    </citeinfo>
+                </srccite>
+                <typesrc>hardDisk</typesrc>
+                <srctime>
+                    <timeinfo>
+                        <sngdate>
+                            <caldate>19950000</caldate>
+                        </sngdate>
+                    </timeinfo>
+                    <srccurr>ground condition</srccurr>
+                </srctime>
+                <srccitea>EDMD1</srccitea>
+                <srccontr>Control</srccontr>
+            </srcinfo>
+            <srcinfo>
+                <srccite>
+                    <citeinfo>
+                        <origin/>
+                        <pubdate>unknown</pubdate>
+                        <title>Washington DC GIS project</title>
+                        <geoform>map</geoform>
+                    </citeinfo>
+                </srccite>
+                <typesrc>None</typesrc>
+                <srccitea>EDMD3</srccitea>
+                <srccontr>Photographic Products</srccontr>
+            </srcinfo>
+            <procstep>
+                <procdesc>EDMD transferred control points, pass and tie points from the 1995 analytical aerotriangulation solution. Control was transferred from 1995 working diapositives to diapositives of the new photography. Control points were transferred optically using a Wild PUG 4-point transfer device equipped with a 60-micron drill.</procdesc>
+                <procdate>unknown</procdate>
+                <srcprod>EDMD1</srcprod>
+                <proccont>
+                    <cntinfo>
+                        <cntorgp>
+                            <cntorg>EarthData International</cntorg>
+                        </cntorgp>
+                        <cntaddr>
+                            <addrtype>mailing and physical</addrtype>
+                            <address>45 W. Watkins Mill Road Suite G</address>
+                            <city>Gaithersburg</city>
+                            <state>MD</state>
+                            <postal>20878</postal>
+                            <country>US</country>
+                        </cntaddr>
+                        <cntvoice>301.948.8550</cntvoice>
+                        <cntfax>301.963.2064</cntfax>
+                        <hours>Regular office hours</hours>
+                    </cntinfo>
+                </proccont>
+            </procstep>
+            <procstep>
+                <procdesc>SIS Automation EDMD will submit a copy of the edited planimetric data to Dewberry &amp; Davis for the automation of the street inventory system. It is anticipated that there will be a delay of 4 weeks between the completion of planimetric mapping and completion of the corresponding SIS database. The following is a description of the process that will be used to Step 1 EDMD, D&amp;D, NCPC and designated representatives of DC DPW will meet to accomplish the Presentation of the listing of government furnished material that are needed by D&amp;D Set up conventions for creation of intersection nodes Set up conventions for attribution Set up conventions for reporting of omissions, errors or other QC issues in the SIS data to DC DPW and NCPC These conventions will be tested and validated during the pilot project. Step 2 For each contiguous block of centerlines, D&amp;D will extend curb lines through street intersections and generate intersection nodes consistent with DPW guidance established in step 1. Step 3 Where two or more nodes are present that comprise a single intersection (e.g., two multi-street centerlines that intersect with four nodes), D&amp;D will cluster those nodes and identify an intersection centroid for linking SIS files of street names, address ranges, etc. Step 4 D&amp;D will overlay the SIS files and conflate them to match the centerlines, nodes, and multi-node centroids. Because of anticipated SIS shortcomings, such as identified in D&amp;D's Washington GIS, Pilot Project Final Report, dated June 30, 1997, this conflation will normally be performed manually. Step 5 D&amp;D will overlay the georeferenced SIS files over 1995 digital orthophotos and copies of the 1999 planimetric mapping provided by EDI to ensure that the new SIS files satisfy positional accuracy requirements. Step 6 D&amp;D will deliver one set of ARC/INFO export files (.e00) on CD-ROM to NCPC and will conduct a demonstration, on DPW equipment (PC ArcView), that the current INFO attributes work with the revised street centerline file coverage. Step 7 D&amp;D will conduct on-site field verification surveys (1) direction (2) street name, (3) address ranges for each street segment between cross-streets, (4) number of lanes, (5) directionality of lane, and (6) lane usage. Step 8 Addition of streets not digitized by EDMD. Step 9 Correction of address ranges where streets are bisected by added streets. Step 10 Correction of other SIS data errors observable from "windshield surveys." Step 11 Provision of discrepancy lists, to NCPC, where SIS street names differ from those posted on street signs. D&amp;D will not change the SIS files to match street signs that are verified in the field.</procdesc>
+                <srcused>EDMD3</srcused>
+                <procdate>unknown</procdate>
+                <srcprod>DD1</srcprod>
+                <proccont>
+                    <cntinfo>
+                        <cntorgp>
+                            <cntorg>Dewberry Davis, LLC</cntorg>
+                        </cntorgp>
+                        <cntaddr>
+                            <addrtype>mailing and physical</addrtype>
+                            <address>8401 Arlington Blvd.</address>
+                            <city>Fairfax</city>
+                            <state>VA</state>
+                            <postal>22031</postal>
+                            <country>US</country>
+                        </cntaddr>
+                        <cntvoice>703.849.0614</cntvoice>
+                        <hours>Regular office hours</hours>
+                    </cntinfo>
+                </proccont>
+            </procstep>
+            <procstep>
+                <procdesc>EDMD produced 2 full sets of contact prints. The prints were separated into a total of 4 sets of prints, 2 sets of even frames and 2 sets of odd frames. Three of these sets were delivered to NCPC for distribution to the District. One set was held by EDMD for reference purposes. The project manager determined if an odd or even set was withheld for work purposes. The planimetric mapping was developed using a set of stable base color film diapositives that are created from the 1999 photography. EDMD produced a flight line index of the completed photography. The positions of the photographs as recorded by the ASCOT navigation/control system was plotted over an existing raster or vector map of the District of Columbia. EDMD delivered 3 plots of the completed index to NCPC.</procdesc>
+                <srcused>EDMD2</srcused>
+                <procdate>unknown</procdate>
+                <srcprod>EDMD3</srcprod>
+                <proccont>
+                    <cntinfo>
+                        <cntorgp>
+                            <cntorg>EarthData International</cntorg>
+                        </cntorgp>
+                        <cntaddr>
+                            <addrtype>mailing and physical</addrtype>
+                            <address>45 W. Watkins Mill Road Suite G</address>
+                            <city>Gaithersburg</city>
+                            <state>MD</state>
+                            <postal>20878</postal>
+                            <country>US</country>
+                        </cntaddr>
+                        <cntvoice>301.948.8550</cntvoice>
+                        <cntfax>301.963.2064</cntfax>
+                        <hours>Regular office hours</hours>
+                    </cntinfo>
+                </proccont>
+            </procstep>
+            <procstep>
+                <procdesc>Planimetric Data Capture and Edit The following is a step-by-step description of the steps involved in the collection of planimetric features from the aerial photography. Step 1 Planimetric data is captured within each flightline proceeding in an North-South or South-North progression. The diapositives and contact prints for each of the priority production areas are assigned to photogrammetric technician for data collection. All planimetric data is collected using Wild BC-2 first order analytical stereoplotting systems. Step 2 The photogrammetric supervisor establishes the data collection conventions to be used for data capture. All planimetric data is initially collected in the Microstation environment. The photogrammetric supervisor establishes data collection conventions and establishes the data-layering schema, global origin and working units to be used for data collection. These preferences are programmed into Microstation to ensure continuity. Step 3 Planimetric data is collected and saved to the designated network subdirectory. As data is collected, the technician reviews the planimetric information on the stereoplotter monitor to ensure that collection is complete and that the required features are depicted and assigned to the correct layer in the CAD design file. EDMD has developed an in-house CAD application to prepare the planimetric features for conversion to polygons once the data has been migrated into ARC/INFO. The technician collects planimetric features in a clockwise direction, which create centroids at the completion of each line. Each of these centroids delineates the outer boundary of a polygon. In areas where a line creates a boundary for multiple features (edge of pavement, edge of parking lot, edge of parking lot-edge of building), the line segment is duplicated and assigned to all layers of the file that contain the effected features. Step 4 The photogrammetric technician completes information for inclusion in the metadata. Step 5 As stereo models are completed on the analytical stereoplotter, the cartographic editor copies a number of files pertaining to a block of map coverage and merges the data sets into map-sheet-oriented format. The merged data is inspected for compliance with the database design. Criteria for inspection include correct layer assignment, line color, and line style. The CAD application has incorporated quality control functions, which add temporary symbols to indicate the necessary duplication of line segments to complete polygon closure in all affected features. The editor makes any corrections or additions interactively. If necessary, lines are snapped to ensure closure. Step 5A The cartographic editor translates the ARC/INFO coverages of the existing planimetric data that was produced as part of Task 2 and the State Department modification into a CAD readable format. The line work between the new mapping and existing mapping is tied together to ensure compliance with the contract requirements for topology. Step 6 As coverage areas are completed; the editor informs the ARC/INFO supervisor that data is ready for conversion and final quality control. The completed vector files are copied to a designated network subdirectory. In order to avoid the possibility that incomplete or unedited data sets are mistakenly imported during production, a separate network subdirectory is used for the data at each stage in the production process. The network subdirectory structure is standardized for every project. Step 7 Edited data sets are translated into ARC/INFO and polygon topology is created. The process used to create the final ARC/INFO coverages is described in the Attribute Accuracy Report Section. Step 8 The cartographic technician records any pertinent dates or other information for completion of metadata. Plots EDMD developed an ARC/INFO AML to generate hard copy plots of the 1995 digital orthophotos as part of Task 3. This routine will be modified to accommodate plotting of the planimetric and/or topographic data. The format will retain the graphic design that was developed in 1999. Design elements of the format and surround as well as the planimetric/topographic mapping will be fully compliant with the requirements stated in the contract modification. Upon completion of the initial editing and conversion of the data to ARC/INFO, EDMD will prepare a set of bond paper plots. Polygon features will be color coded for cartographic clarity and will enable NCPC quality inspectors to verify that no polygons overlap or are miscoded. A copy of the digital data that corresponds to the plots will be included to allow inspectors to review digital data content. NCPC will inspect the plots and mark any errors, omissions or mistakes on the plots. The edited plots are returned to EDMD for correction. Once the data has been corrected, EDMD will produce a total of 3 sets of inkjet mylar plots containing the planimetric data only in the approved format surround.</procdesc>
+                <srcused>EDMD3</srcused>
+                <srcused>EDMD1</srcused>
+                <srcused>EDMD2</srcused>
+                <procdate>unknown</procdate>
+                <proccont>
+                    <cntinfo>
+                        <cntorgp>
+                            <cntorg>EarthData International</cntorg>
+                        </cntorgp>
+                        <cntaddr>
+                            <addrtype>mailing and physical</addrtype>
+                            <address>45 W. Watkins Mill Road Suite G</address>
+                            <city>Gaithersburg</city>
+                            <state>MD</state>
+                            <postal>20878</postal>
+                            <country>US</country>
+                        </cntaddr>
+                        <cntvoice>301.948.8550</cntvoice>
+                        <cntfax>301.963.2064</cntfax>
+                        <hours>Regular office hours</hours>
+                    </cntinfo>
+                </proccont>
+            </procstep>
+            <procstep>
+                <procdesc>EDMD acquired new aerial photography of the District of Columbia in the spring of 1999 prior to the emergence of deciduous foliage. Aerial photography was exposed at an altitude of 7,200' AMT using a Wild RC-20 or RC-30 camera system that is equipped with forward motion compensation and a 12" (300mm) focal length lens cone 600'. The flight design developed in 1995 was duplicated. The design calls for an approximate total of 1,000 frames in 24 North-South oriented flight lines. Forward overlap between frames within each flight line was 80%. Sidelap between adjacent flight lines was 48%. Aerial photography was captured in natural color using Kodak Aerocolor negative film type 2445. Aerial photography was not exposed using airborne GPS due to the existence of an existing control network created in 1995.</procdesc>
+                <procdate>unknown</procdate>
+                <srcprod>EDMD2</srcprod>
+                <proccont>
+                    <cntinfo>
+                        <cntorgp>
+                            <cntorg>EarthData International</cntorg>
+                        </cntorgp>
+                        <cntaddr>
+                            <addrtype>mailing and physical</addrtype>
+                            <address>45 W. Watkins Mill Road Suite G</address>
+                            <city>Gaithersburg</city>
+                            <state>MD</state>
+                            <postal>20878</postal>
+                            <country>US</country>
+                        </cntaddr>
+                        <cntvoice>301.948.8550</cntvoice>
+                        <cntfax>301.963.2064</cntfax>
+                        <hours>Regular office hours</hours>
+                    </cntinfo>
+                </proccont>
+            </procstep>
+            <procstep>
+                <procdesc>Extracted from Librarian using Simple option into coverage, then imported to geodatabase. Straight line conversion to shape. The NCPC ArcInfo Librarian dataset is made up of 350 tiles. Over 29 data layers were extracted from the Librarian using the following procedures (see planimetric process.xls). 1) In order to withdraw seemless data out of Librarian an extraction polygon must be created. The extraction polygon must encompass the span of all the tiles. Extracting the index layer of the librarian and dissolving the boundaries of the 350 polygons into 1 polygon accomplished this task. The procedures for creating the extraction polygon are as follows: ¨ Extract the index layer using Arcview and converting the theme into a shapefile. ¨ Create a field within the feature table for which the individual polygon can dissolve from by assigning a value of 1 in it for all records. ¨ Using the geo-processor extension option, the shapefiles' records were dissolved into 1 poly by dissolving the records with the common field. ¨ The polygon theme was then transformed into a polygon coverage through ArcToolbox. ¨ Once the extraction polygon was prepped, data layer extraction was completely done in the ArcInfo environment. Setting the ArcInfo Environment. 1) Launch the ArcInfo Command Prompt window. 2) Set the working directory ( arc: w extraction) 
+				3) Set the precision for the environment and to all processes done in the ArcInfo Session. ( arc: Precision double double ) 4) Enter the librarian module (arc: Librarian) 5) Set the library volume (Librarian: library ncpc) 6) Set the extraction polygon coverage (Librarian: setcover index) 7) Set the layer to be extracted (Librarian : setlayer air) 8) Enter the command line to extract. (Librarian: extract OPTION # clip) The extract command has a few options that can be set when extracting different types of layers such as polygons, lines, and points. Extract DISSOLVE is used for polygon layers only because it will extract the layer and merge the polygons where they are split by index tiles, thus removing additional polys. The ArcInfo commands involved with this option are Clip Dissolve and Build. For Line and Point layers, the SIMPLE option was used to extract. The topology is left unbuilt when the information is extracted. Reason being that if the tile lines segment lines and create pseudo nodes. The user-id from the ArcInfo table were used to unsplit the lines and remove the pseudo node. Once that is done, the coverage can rebuild the topology. Data Improvements The line data coverages had tiles with some additional pseudo nodes. The pseudo nodes were probably created as a result of different digitizing techniques (neither right nor wrong). Using the Unsplit command we were able to clean these areas up by unspliting only lines that had the same dxf-layer value and that shared a node. Data cleanup The polygon coverages extracted contained void (coded 9999) areas. In Arcedit, these ambiguous features were removed with the following technique. Arc: ae (enter arcedit module) Arcedit: ec coverage (enter the editing coverage) Arcedit: ef poly (enter the feature to be edited) Arcedit: select for dxf-layer = 'VOID' (querying for features in the attribute table under dxf-layer that contains attribute labeled VOID) Arcedit: delete (delete the features found) Arcedit: Save (save the changes) The line coverages had the neatlines using the same method where the dxf-layer had values = 'NEATLINE' Creating Shapefiles All data sets were converted into shapefiles and clipped to the DC Boundary for import into the geodatabase. From the Arc: prompt window, the command ARCSHAPE was used to create the shape coverages. This required the user to specify which coverage to convert, the feature class, and naming convention of the output shapefile.</procdesc>
+            </procstep>
+        </lineage>
+    </dataqual>
+    <spdoinfo>
+        <direct>Vector</direct>
+        <ptvctinf>
+            <sdtsterm>
+                <sdtstype>String</sdtstype>
+                <ptvctcnt>13554</ptvctcnt>
+            </sdtsterm>
+        </ptvctinf>
+    </spdoinfo>
+    <eainfo>
+        <detailed>
+            <enttyp>
+                <enttypl>DCGIS_ARCHIVE.SISscln_1999</enttypl>
+            </enttyp>
+            <attr>
+                <attrlabl>OBJECTID</attrlabl>
+                <attrdef>Internal feature number.</attrdef>
+                <attrdefs>ESRI</attrdefs>
+                <attrdomv>
+                              
+                    <udom>Sequential unique whole numbers that are automatically generated.</udom>
+                            
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>FNODE_</attrlabl>
+                <attrdef>Feature geometry.</attrdef>
+                <attrdefs>ESRI</attrdefs>
+                <attrdomv>
+                              
+                    <udom>Coordinates defining the features.</udom>
+                            
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>TNODE_</attrlabl>
+                <attrdef>From node #</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>LPOLY_</attrlabl>
+                <attrdef>To node #</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>RPOLY_</attrlabl>
+                <attrdef>Left polygon #</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>LENGTH</attrlabl>
+                <attrdef>Right polygon #</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>SIS_ID</attrlabl>
+                <attrdef>Segment length</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>SNAPS_TO</attrlabl>
+                <attrdef>Coverage artifact</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>SCL_CODE</attrlabl>
+                <attrdef>Coverage artifact</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>DXF_LAYER</attrlabl>
+                <attrdef>Feature code</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>QUAD_CODE</attrlabl>
+                <attrdef>DXF Layer</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>PRIME_ST</attrlabl>
+                <attrdef>Street Inventory System ID</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>INT_SEQ</attrlabl>
+                <attrdef>Quad code</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>ST_NAME</attrlabl>
+                <attrdef>Prime street number</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>FDPRE</attrlabl>
+                <attrdef>Intersection sequence number</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>FNAME</attrlabl>
+                <attrdef>Street name</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>FTYPE</attrlabl>
+                <attrdef>Street prefix</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>FDSUF</attrlabl>
+                <attrdef>Street name</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>LEFTADD1</attrlabl>
+                <attrdef>Street type</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>LEFTADD2</attrlabl>
+                <attrdef>Street suffix</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>RGTADD1</attrlabl>
+                <attrdef>Actual left address at from node</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>RGTADD2</attrlabl>
+                <attrdef>Actual left address at to node</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>LEFTRANGE1</attrlabl>
+                <attrdef>Actual right address at from node</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>LEFTRANGE2</attrlabl>
+                <attrdef>Actual right address at to node</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>RGTRANGE1</attrlabl>
+                <attrdef>Theoretical left address at from node</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>RGTRANGE2</attrlabl>
+                <attrdef>Theoretical left address at to node</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>DOMAIN_</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>FUNC_CLASS</attrlabl>
+                <attrdef>Theoretical right address at to node</attrdef>
+            </attr>
+            <attr>
+                <attrlabl>FA_SYSTEM</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>FA_NO</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>DOMAINDESC</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>SHAPE</attrlabl>
+                <attrdef>Feature geometry.</attrdef>
+                <attrdefs>ESRI</attrdefs>
+                <attrdomv>
+                              
+                    <udom>Coordinates defining the features.</udom>
+                            
+                </attrdomv>
+            </attr>
+            <attr>
+                <attrlabl>SE_ANNO_CAD_DATA</attrlabl>
+            </attr>
+            <attr>
+                <attrlabl>SHAPE.LEN</attrlabl>
+            </attr>
+        </detailed>
+        <overview>
+            <eaover>
+Street Centerline
+Alley Centerline
+Curbs
+Road Polygon
+Median Island
+Traffic Island
+Alley Polygon
+Drive, Paved
+Parking Lot, Paved
+Parking Lot, Unpaved
+Intersection (outside crosswalk)
+Other Traffic Control Sign
+Overhead Traffic Sign
+Runway
+Taxiway, Apron
+Airport Perimeter
+Helipad
+Railroad Centerline
+Metro Station, Below Ground
+Metro Station Entrance (escalator goes down)
+Bus Shelter
+Wheelchair Ramp
+Concrete Barrier (parking bumpers)
+Guard Rail
+Sidewalk (public)
+Bridge
+Tunnel Entrance
+Building
+Memorial
+Major Fence Line
+Wall
+Stairs, Major Building
+Misc. Line Features
+Roofbreak
+Statue
+Planter
+Tank
+Bench
+Bollard
+Misc. Point Feature
+Cemetery
+Park, Zoo, Garden
+Golf, Sport Field
+Misc. Polygon  (area u/c, pile, shoulder, conc. slab)
+Tree/Street ROW
+Wooded Area, Unclassified
+Lake
+Pond
+River
+Canal
+Swimming Pool (not on top of bldgs)
+Stream
+Dock or Pier
+Jetty
+Seawall
+Utility Pole
+Street Pole
+Traffic Signal Pole
+Power Trans tower
+Substation
+FHUNK, Hydrant, unknown
+Unidentified Manhole
+Headwall
+Catchbasin, Standard
+Grate Inlet
+Grate
+Obscured Areas
+</eaover>
+            <eadetcit>Arc/Info database structure for NCPC</eadetcit>
+        </overview>
+    </eainfo>
+    <distinfo>
+        <distrib>
+            <cntinfo>
+                <cntorgp>
+                    <cntorg>D.C. Office of the Chief Technology Officer</cntorg>
+                    <cntper>GIS Data Coordinator</cntper>
+                </cntorgp>
+                <cntaddr>
+                    <addrtype>mailing and physical</addrtype>
+                    <address>200 I Street SE, 5th Floor</address>
+                    <city>Washington</city>
+                    <state>DC</state>
+                    <postal>20003</postal>
+                    <country>US</country>
+                </cntaddr>
+                <cntfax>(202) 727-5660</cntfax>
+                <cntemail>dcgis@dc.gov</cntemail>
+                <hours>8:30 am - 5 pm</hours>
+            </cntinfo>
+        </distrib>
+        <distliab>See access and use constraints information.</distliab>
+        <custom>DC datasets can be downloaded from "http://opendata.dc.gov".</custom>
+    </distinfo>
+    <metainfo>
+        <metd>20180719</metd>
+        <metc>
+            <cntinfo>
+                <cntorgp>
+                    <cntorg>D.C. Office of the Chief Technology Officer</cntorg>
+                    <cntper>GIS Data Coordinator</cntper>
+                </cntorgp>
+                <cntaddr>
+                    <addrtype>mailing and physical</addrtype>
+                    <address>200 I Street SE, 5th Floor</address>
+                    <city>Washington</city>
+                    <state>DC</state>
+                    <postal>20003</postal>
+                    <country>US</country>
+                </cntaddr>
+                <cntfax>(202) 727-5660</cntfax>
+                <cntemail>dcgis@dc.gov</cntemail>
+                <hours>8:30 am - 5 pm</hours>
+            </cntinfo>
+        </metc>
+        <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+        <metstdv>FGDC-STD-001-1998</metstdv>
+        <mettc>local time</mettc>
+    </metainfo>
+</metadata>
