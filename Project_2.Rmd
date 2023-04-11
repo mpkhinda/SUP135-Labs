@@ -29,8 +29,7 @@ cat('\014')
 
 ```{r load data, include=FALSE}
 atlas <- read_dta(here("datasets", "atlas.dta"))
-streets <- read_sf(here("datasets", "Street_Centerlines_1999/Street_Centerlines_1999.shp")) %>%
-  select(OBJECTID, ST_NAME)
+streets <- read_sf(here("datasets", "Street_Centerlines_1999/Street_Centerlines_1999.shp"))
 tract_geom <- read_sf(here("datasets", "Census_Tracts_in_2010/Census_Tracts_in_2010.shp")) %>%
   select(GEOID, geometry)
 ```
@@ -40,7 +39,7 @@ tract_geom <- read_sf(here("datasets", "Census_Tracts_in_2010/Census_Tracts_in_2
 # the same coordinate projection system
 ggplot()+
   geom_sf(data = tract_geom) +
-  geom_sf(data = streets) +
+  geom_sf(data = streets,  alpha = 0.5) +
   theme_void()
 ```
 ```{r create simplified segments}
@@ -84,9 +83,9 @@ simplified_streets <- simplified_streets %>%
   
 # test plot to see simplified network
 ggplot()+
-  geom_sf(data = tract_geom) +
   geom_sf(data = streets, alpha = 0.2) +
   geom_sf(data = simplified_streets, color = "red") +
+  geom_sf(data = tract_geom, fill = NA) +
   theme_void()
 
 ```
@@ -94,9 +93,25 @@ ggplot()+
 
 ```{r select segments by tract}
 
+# extract list of geoids
+GEOID_list <- tract_geom %>%
+  st_drop_geometry()
+
+# create dataframes for each GEOID with clipped roads
+for (i in seq(1,nrow(tract_geom),1)){
+  assign(paste("streets_tract_", GEOID_list$GEOID[i], sep =""), 
+         tract_geom %>%
+         subset(GEOID == GEOID_list$GEOID[i]) %>%
+         st_intersection(simplified_streets))
+}
 
 
-
+# test plot to see clipped simplified network
+ggplot()+
+  geom_sf(data = streets, alpha = 0.2) +
+  geom_sf(data = streets_tract_11001009503, color = "red") +
+  geom_sf(data = tract_geom, fill = NA) +
+  theme_void()
 ```
 
 
