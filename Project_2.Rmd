@@ -29,7 +29,8 @@ cat('\014')
 
 ```{r load data, include=FALSE}
 atlas <- read_dta(here("datasets", "atlas.dta"))
-streets <- read_sf(here("datasets", "Street_Centerlines_1999/Street_Centerlines_1999.shp"))
+streets <- read_sf(here("datasets", "Street_Centerlines_1999/Street_Centerlines_1999.shp")) %>%
+  select(OBJECTID, ST_NAME)
 tract_geom <- read_sf(here("datasets", "Census_Tracts_in_2010/Census_Tracts_in_2010.shp")) %>%
   select(GEOID, geometry)
 ```
@@ -42,6 +43,54 @@ ggplot()+
   geom_sf(data = streets) +
   theme_void()
 ```
+```{r create simplified segments}
+#simplify topology to line from start and end nodes only
+get_start_end <- function(line){
+  to_points <- st_cast(line$geometry, "POINT")
+  start <- to_points[1]
+  end <- to_points[length(to_points)]
+  
+  return(data.frame(name = line$ST_NAME, 
+                    start_lon = unlist(start)[1], 
+                    start_lat = unlist(start)[2], 
+                    end_lon = unlist(end)[1], 
+                    end_lat = unlist(end)[2], 
+                    geometry = st_cast(st_union(start,end),"LINESTRING")))
+}
+
+# test function on single segment
+test_run <- streets %>%
+  subset(OBJECTID == 5) %>%
+  get_start_end() %>%
+  st_as_sf()
+
+
+# loop through all segments and apply function (Takes 18 mins)
+simplified_streets <- data.frame()
+
+for (i in seq(1,nrow(streets),1)){
+  temp_segment <- streets %>%
+    subset(OBJECTID == i) %>%
+    get_start_end() %>%
+    st_as_sf()
+  
+  simplified_streets <- rbind(simplified_streets, temp_segment)
+}
+
+# filter out points with no length
+simplified_streets <- simplified_streets %>% 
+  filter(start_lon != end_lon)
+
+  
+# test plot to see simplified network
+ggplot()+
+  geom_sf(data = tract_geom) +
+  geom_sf(data = streets, alpha = 0.2) +
+  geom_sf(data = simplified_streets, color = "red") +
+  theme_void()
+
+```
+
 
 ```{r select segments by tract}
 
@@ -49,6 +98,14 @@ ggplot()+
 
 
 ```
+
+
+```{r calc street bearings}
+
+
+
+```
+
 
 ```{r determine tract street entropy}
 
