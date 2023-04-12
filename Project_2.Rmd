@@ -30,18 +30,64 @@ cat('\014')
 ```{r load data, include=FALSE}
 atlas <- read_dta(here("datasets", "atlas.dta"))
 streets <- read_sf(here("datasets", "Street_Centerlines_1999/Street_Centerlines_1999.shp"))
+nodes <- read_sf(here("datasets", "Street_Centerlines_1999/Street_Nodes_1999.shp")) %>%
+  select(OBJECTID) # removes all extraneous info
 tract_geom <- read_sf(here("datasets", "Census_Tracts_in_2010/Census_Tracts_in_2010.shp")) %>%
   select(GEOID, geometry)
 ```
 
 ```{r map test}
-# test plot to check that streets and tracts are using 
+# test plot to check that streets, nodes, and tracts are using 
 # the same coordinate projection system
 ggplot()+
   geom_sf(data = tract_geom) +
   geom_sf(data = streets,  alpha = 0.5) +
+  geom_sf(data = nodes, alpha = 0.5, size = 0.5) +
   theme_void()
 ```
+
+```{r avg nodal degree}
+
+# Example of loop assigning node degree
+nodes_example <- nodes %>%
+  subset(OBJECTID < 6) 
+
+for (i in seq(1, 5, 1)){
+  touch_list <- st_touches(streets,nodes %>% subset(OBJECTID == i))
+  nodes_example$node_degree[i] <- sum(unlist(touch_list))
+}
+
+# calculate avg nodal degree for each node in network 
+# DO NOT RE-RUN, TAKES 3+ HOURS! SEE ABOVE EXAMPLE FOR DEMONSTRATION
+
+#for (i in seq(1, nrow(nodes), 1)){
+  #touch_list <- st_touches(streets,nodes %>% subset(OBJECTID == i))
+  #nodes$node_degree[i] <- sum(unlist(touch_list))
+  
+  # print progress
+  #cat(paste0(round(i / nrow(nodes) * 100), '% completed'))
+  #Sys.sleep(.5)
+  #if (i == nrow(nodes)) cat(': Done')
+  #else cat('\014')
+#}
+
+# write to geojson to avoid needing to re-do above loop
+st_write(nodes,here("datasets", "nodes_w_degree.geojson"))
+
+```
+
+```{r group nodes by tract}
+
+
+
+```
+
+
+
+
+
+
+
 ```{r create simplified segments}
 #simplify topology to line from start and end nodes only
 get_start_end <- function(line){
@@ -98,18 +144,18 @@ GEOID_list <- tract_geom %>%
   st_drop_geometry()
 
 # create dataframes for each GEOID with clipped roads
-for (i in seq(1,nrow(tract_geom),1)){
+for (i in seq(1,1,1)){
   assign(paste("streets_tract_", GEOID_list$GEOID[i], sep =""), 
          tract_geom %>%
          subset(GEOID == GEOID_list$GEOID[i]) %>%
-         st_intersection(simplified_streets))
+         st_intersection(streets))
 }
 
 
 # test plot to see clipped simplified network
 ggplot()+
   geom_sf(data = streets, alpha = 0.2) +
-  geom_sf(data = streets_tract_11001009503, color = "red") +
+  geom_sf(data = streets_tract_11001002102, color = "red") +
   geom_sf(data = tract_geom, fill = NA) +
   theme_void()
 ```
