@@ -38,8 +38,7 @@ tract_geom <- read_sf(here("datasets", "Census_Tracts_in_2010/Census_Tracts_in_2
 ```
 
 ```{r map test}
-# test plot to check that streets, nodes, and tracts are using 
-# the same coordinate projection system
+# test plot to check that streets, nodes, and tracts are using the same coordinate projection system
 ggplot()+
   geom_sf(data = tract_geom) +
   geom_sf(data = streets,  alpha = 0.5) +
@@ -54,8 +53,10 @@ nodes_example <- nodes %>%
   subset(OBJECTID < 6) # limit example to first five nodes
 
 for (i in seq(1, 5, 1)){
-  touch_list <- st_touches(streets,nodes %>% subset(OBJECTID == i)) # get list of binary variables for all road segments indicating if the segment touches the node
-  nodes_example$node_degree[i] <- sum(unlist(touch_list)) # roll up count of 1s for roads that touch the node to obtain the node degree
+  # get list of binary variables for all road segments indicating if the segment touches the node
+  touch_list <- st_touches(streets,nodes %>% subset(OBJECTID == i)) 
+  # sum up count of 1s for roads that touch the node to obtain the node degree
+  nodes_example$node_degree[i] <- sum(unlist(touch_list)) 
 }
 
 
@@ -110,7 +111,20 @@ DC_atlas <- left_join(DC_atlas, tracts_w_node_degree) %>%
   select(!c(GEOID, geometry))
 ```
 
+```{r correlation test plot}
+ggplot(data = DC_atlas, aes(x = avg_node_degree , y = kfr_pooled_pooled_p25)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -.2) +
+  labs(title = "Street Grid Connectedness vs. Mean Income Percentile Rank for Children of Low-Income Parents in Washington, DC", x = "Average Node Degree", y = "Mean Income Percentile Rank") +
+  stat_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+```
 
+```{r linear model}
+univariate_model <- lm(kfr_pooled_pooled_p25 ~ avg_node_degree, data = DC_atlas)
+summary(univariate_model)
+```
 
 
 
