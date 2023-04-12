@@ -90,11 +90,18 @@ tracts_w_node_degree <- st_join(tract_geom, nodes, join = st_contains) %>%
   group_by(GEOID) %>%
   summarise(avg_node_degree = mean(node_degree))
 
-# test plot to visualize average node degree by tract
+# Map plot to visualize average node degree by tract
 ggplot()+
   geom_sf(data = tracts_w_node_degree, aes(fill = avg_node_degree), color = NA) +
-  geom_sf(data = streets,  alpha = 0.5) +
-  theme_void()
+  scale_fill_viridis_c(option = "rocket") +
+  geom_sf(data = streets,  alpha = 0.5, color = "white") +
+  geom_sf(data = nodes, alpha = 0.5, size = 0.65, color = "white") +
+  labs(fill = "Mean Nodal Degree", title = "Street Grid Connectedness (1999 Network) by Census Tract in Washington, DC") +
+  annotation_scale(aes(unit_category = "imperial", style = "ticks"), tick_height = 0.6, pad_x = unit(1, "cm"), pad_y = unit(2, "cm")) +
+  theme_void() +
+  theme(plot.title = element_text(size=20,hjust = 0.5),
+        legend.position = c(.9, .85),
+        legend.justification = c("right", "top")) 
 ```
 
 ```{r join data to atlas}
@@ -124,12 +131,84 @@ ggplot(data = DC_atlas, aes(x = avg_node_degree , y = kfr_pooled_pooled_p25)) +
 ```{r linear model}
 univariate_model <- lm(kfr_pooled_pooled_p25 ~ avg_node_degree, data = DC_atlas)
 summary(univariate_model)
+
+cor_coeff_avgNodeDeg <- cor(DC_atlas$kfr_pooled_pooled_p25, DC_atlas$avg_node_degree, use = "complete.obs")
 ```
 
+```{r covariate testing}
+
+# Built environment factors
+ggplot(data = DC_atlas, aes(x = avg_node_degree , y = extreme_heat)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -.2) +
+  labs(title = "Street Grid Connectedness vs. Extreme Heat in Washington, DC", x = "Average Node Degree", y = "Degrees Above Basline Temperature") +
+  stat_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+ggplot(data = DC_atlas, aes(x = avg_node_degree , y = developed)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -.2) +
+  labs(title = "Street Grid Connectedness vs. Development in Washington, DC", x = "Average Node Degree", y = "Fraction of Land Area Developed") +
+  stat_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+ggplot(data = DC_atlas, aes(x = avg_node_degree , y = popdensity2000)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -150) +
+  labs(title = "Street Grid Connectedness vs. Population Density in Washington, DC", x = "Average Node Degree", y = "Population Density in 2000") +
+  stat_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+
+# Racial demographics
+ggplot(data = DC_atlas, aes(x = avg_node_degree , y = share_black2000)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -.2) +
+  labs(title = "Street Grid Connectedness vs. Share of Black Residents in Washington, DC", x = "Average Node Degree", y = "Share of Black Residents in 2000") +
+  stat_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+ggplot(data = DC_atlas, aes(x = avg_node_degree , y = share_white2000)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -.01) +
+  labs(title = "Street Grid Connectedness vs. Share of White Residents in Washington, DC", x = "Average Node Degree", y = "Share of White Residents in 2000") +
+  stat_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+ggplot(data = DC_atlas, aes(x = avg_node_degree , y = share_hisp2000)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -.01) +
+  labs(title = "Street Grid Connectedness vs. Share of Hispanic Residents in Washington, DC", x = "Average Node Degree", y = "Share of Hispanic Residents in 2000") +
+  stat_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
 
 
 
+# Economic measures
+ggplot(data = DC_atlas, aes(x = avg_node_degree , y = med_hhinc1990)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -1500) +
+  labs(title = "Street Grid Connectedness vs. Median Household Income in Washington, DC", x = "Average Node Degree", y = "Median Household Income in 1990") +
+  stat_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
 
+
+ggplot(data = DC_atlas, aes(x = avg_node_degree , y = med_hhinc2016)) + 
+  geom_point(size = 1) + 
+  geom_text(aes(label=tract), size=2.5, nudge_y = -1500) +
+  labs(title = "Street Grid Connectedness vs. Median Household Income in Washington, DC", x = "Average Node Degree", y = "Median Household Income in 2016") +
+  stat_smooth(method = "lm", se = FALSE) +
+  theme_minimal() +
+  theme(plot.title = element_text(size=18,hjust = 0.5))
+
+```
 
 
 
