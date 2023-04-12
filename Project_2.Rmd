@@ -21,6 +21,7 @@ if (!require(sandwich)) install.packages("sandwich"); library(sandwich)
 if (!require(lmtest)) install.packages("lmtest"); library(lmtest)
 if (!require(sf)) install.packages("sf"); library(sf)
 if (!require(ggspatial)) install.packages("ggspatial"); library(ggspatial)
+if (!require(geojsonsf)) install.packages("geojsonsf"); library(geojsonsf)
 
 # Clear workspace
 rm(list=ls())
@@ -42,136 +43,82 @@ tract_geom <- read_sf(here("datasets", "Census_Tracts_in_2010/Census_Tracts_in_2
 ggplot()+
   geom_sf(data = tract_geom) +
   geom_sf(data = streets,  alpha = 0.5) +
-  geom_sf(data = nodes, alpha = 0.5, size = 0.5) +
+  geom_sf(data = nodes, alpha = 0.5, size = 0.65) +
   theme_void()
 ```
 
-```{r avg nodal degree}
+```{r calc node degree}
 
 # Example of loop assigning node degree
 nodes_example <- nodes %>%
-  subset(OBJECTID < 6) 
+  subset(OBJECTID < 6) # limit example to first five nodes
 
 for (i in seq(1, 5, 1)){
-  touch_list <- st_touches(streets,nodes %>% subset(OBJECTID == i))
-  nodes_example$node_degree[i] <- sum(unlist(touch_list))
+  touch_list <- st_touches(streets,nodes %>% subset(OBJECTID == i)) # get list of binary variables for all road segments indicating if the segment touches the node
+  nodes_example$node_degree[i] <- sum(unlist(touch_list)) # roll up count of 1s for roads that touch the node to obtain the node degree
 }
 
+
+# DO NOT RE-RUN, TAKES 3+ HOURS! SEE ABOVE FOR DEMONSTRATION
+
 # calculate avg nodal degree for each node in network 
-# DO NOT RE-RUN, TAKES 3+ HOURS! SEE ABOVE EXAMPLE FOR DEMONSTRATION
+  #for (i in seq(1, nrow(nodes), 1)){
+    #touch_list <- st_touches(streets,nodes %>% subset(OBJECTID == i))
+    #nodes$node_degree[i] <- sum(unlist(touch_list))
+    
+    # print progress
+    #cat(paste0(round(i / nrow(nodes) * 100), '% completed'))
+    #Sys.sleep(.5)
+    #if (i == nrow(nodes)) cat(': Done')
+    #else cat('\014')
+  #}
 
-#for (i in seq(1, nrow(nodes), 1)){
-  #touch_list <- st_touches(streets,nodes %>% subset(OBJECTID == i))
-  #nodes$node_degree[i] <- sum(unlist(touch_list))
-  
-  # print progress
-  #cat(paste0(round(i / nrow(nodes) * 100), '% completed'))
-  #Sys.sleep(.5)
-  #if (i == nrow(nodes)) cat(': Done')
-  #else cat('\014')
-#}
+# write data to geojson to avoid needing to re-run above loop in the future
+  #st_write(nodes,here("datasets", "nodes_w_degree.geojson"))
 
-# write to geojson to avoid needing to re-do above loop
-st_write(nodes,here("datasets", "nodes_w_degree.geojson"))
+
+# Replaces current dataframe with already prepared data including node degree
+nodes <- geojson_sf(here("datasets", "nodes_w_degree.geojson"))
 
 ```
 
 ```{r group nodes by tract}
 
+# assign each node to the tract it sits within and roll up by GEOID and calculate average node degree
+tracts_w_node_degree <- st_join(tract_geom, nodes, join = st_contains) %>%
+  group_by(GEOID) %>%
+  summarise(avg_node_degree = mean(node_degree))
 
-
-```
-
-
-
-
-
-
-
-```{r create simplified segments}
-#simplify topology to line from start and end nodes only
-get_start_end <- function(line){
-  to_points <- st_cast(line$geometry, "POINT")
-  start <- to_points[1]
-  end <- to_points[length(to_points)]
-  
-  return(data.frame(name = line$ST_NAME, 
-                    start_lon = unlist(start)[1], 
-                    start_lat = unlist(start)[2], 
-                    end_lon = unlist(end)[1], 
-                    end_lat = unlist(end)[2], 
-                    geometry = st_cast(st_union(start,end),"LINESTRING")))
-}
-
-# test function on single segment
-test_run <- streets %>%
-  subset(OBJECTID == 5) %>%
-  get_start_end() %>%
-  st_as_sf()
-
-
-# loop through all segments and apply function (Takes 18 mins)
-simplified_streets <- data.frame()
-
-for (i in seq(1,nrow(streets),1)){
-  temp_segment <- streets %>%
-    subset(OBJECTID == i) %>%
-    get_start_end() %>%
-    st_as_sf()
-  
-  simplified_streets <- rbind(simplified_streets, temp_segment)
-}
-
-# filter out points with no length
-simplified_streets <- simplified_streets %>% 
-  filter(start_lon != end_lon)
-
-  
-# test plot to see simplified network
+# test plot to visualize average node degree by tract
 ggplot()+
-  geom_sf(data = streets, alpha = 0.2) +
-  geom_sf(data = simplified_streets, color = "red") +
-  geom_sf(data = tract_geom, fill = NA) +
-  theme_void()
-
-```
-
-
-```{r select segments by tract}
-
-# extract list of geoids
-GEOID_list <- tract_geom %>%
-  st_drop_geometry()
-
-# create dataframes for each GEOID with clipped roads
-for (i in seq(1,1,1)){
-  assign(paste("streets_tract_", GEOID_list$GEOID[i], sep =""), 
-         tract_geom %>%
-         subset(GEOID == GEOID_list$GEOID[i]) %>%
-         st_intersection(streets))
-}
-
-
-# test plot to see clipped simplified network
-ggplot()+
-  geom_sf(data = streets, alpha = 0.2) +
-  geom_sf(data = streets_tract_11001002102, color = "red") +
-  geom_sf(data = tract_geom, fill = NA) +
+  geom_sf(data = tracts_w_node_degree, aes(fill = avg_node_degree), color = NA) +
+  geom_sf(data = streets,  alpha = 0.5) +
   theme_void()
 ```
 
+```{r join data to atlas}
+# filter atlas data for DC only
+DC_atlas <- subset(atlas, state == 11) 
 
-```{r calc street bearings}
+# create new tract variable from full FIPS code and remove leading 0s to match atlas
+tracts_w_node_degree <- tracts_w_node_degree %>%
+  mutate(tract = sub("^0+", "", substr(GEOID, nchar(GEOID)-5, nchar(GEOID)))) %>%
+  mutate(tract = as.numeric(tract))
 
-
-
+# join average node degree value to atlas data by GEOID
+DC_atlas <- left_join(DC_atlas, tracts_w_node_degree) %>%
+  select(!c(GEOID, geometry))
 ```
 
 
-```{r determine tract street entropy}
 
 
 
-```
+
+
+
+
+
+
 
 
