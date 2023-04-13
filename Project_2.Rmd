@@ -108,7 +108,7 @@ ggplot()+
 # filter atlas data for DC only
 DC_atlas <- subset(atlas, state == 11) 
 
-# create new tract variable from full FIPS code and remove leading 0s to match atlas
+# create new tract variable from full FIPS code and remove leading zeros to match atlas
 tracts_w_node_degree <- tracts_w_node_degree %>%
   mutate(tract = sub("^0+", "", substr(GEOID, nchar(GEOID)-5, nchar(GEOID)))) %>%
   mutate(tract = as.numeric(tract))
@@ -118,11 +118,27 @@ DC_atlas <- left_join(DC_atlas, tracts_w_node_degree) %>%
   select(!c(GEOID, geometry))
 ```
 
+```{r node degree histogram}
+ggplot(data = DC_atlas, aes(x = avg_node_degree))+
+  geom_histogram(bins = 30, fill = "black") + 
+  theme_minimal()
+```
+
+```{r nodal degree summary stats}
+# Get summary stats
+sumStats_avgNodeDeg <- summary(DC_atlas$avg_node_degree)
+# Add standard dev to summary stats
+sumStats_avgNodeDeg["Std. Dev"] <- sd(DC_atlas$avg_node_degree, na.rm = T)
+
+sumStats_avgNodeDeg
+```
+
+
 ```{r correlation test plot}
 ggplot(data = DC_atlas, aes(x = avg_node_degree , y = kfr_pooled_pooled_p25)) + 
   geom_point(size = 1) + 
   geom_text(aes(label=tract), size=2.5, nudge_y = -.2) +
-  labs(title = "Street Grid Connectedness vs. Mean Income Percentile Rank for Children of Low-Income Parents in Washington, DC", x = "Average Node Degree", y = "Mean Income Percentile Rank") +
+  labs(title = "Street Grid Connectedness vs. Mean Income Percentile Rank for Children of Low-Income Parents in Washington, DC", x = "Mean Nodal Degree", y = "Mean Income Percentile Rank") +
   stat_smooth(method = "lm", se = FALSE) +
   theme_minimal() +
   theme(plot.title = element_text(size=18,hjust = 0.5))
