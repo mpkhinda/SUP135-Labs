@@ -118,30 +118,38 @@ DC_atlas <- left_join(DC_atlas, tracts_w_node_degree) %>%
   select(!c(GEOID, geometry))
 ```
 
-```{r node degree histogram}
-ggplot(data = DC_atlas, aes(x = avg_node_degree))+
-  geom_histogram(bins = 30, fill = "black") + 
-  theme_minimal()
-```
-
 ```{r nodal degree summary stats}
 # Get summary stats
 sumStats_avgNodeDeg <- summary(DC_atlas$avg_node_degree)
 # Add standard dev to summary stats
-sumStats_avgNodeDeg["Std. Dev"] <- sd(DC_atlas$avg_node_degree, na.rm = T)
+sumStats_avgNodeDeg["Std.Dev"] <- sd(DC_atlas$avg_node_degree, na.rm = T)
 
-sumStats_avgNodeDeg
+# convert summary stats to dataframe and rename variables
+sumStats_avgNodeDeg <- data.frame(as.list(sumStats_avgNodeDeg)) %>%
+  rename(Q1 = X1st.Qu.,
+         Q3 = X3rd.Qu.)
+```
+
+```{r node degree histogram}
+ggplot(data = DC_atlas, aes(x = avg_node_degree))+
+  geom_histogram(bins = 30, fill = "black", color = "white", size = 2) + 
+  labs(title = "Distribution of Street Grid Connectedness (1999 Network) in Washington, DC", y = "Number of Census Tracts", x = "Mean Nodal Degree") + 
+  theme_minimal() + 
+  theme(plot.title = element_text(size=28,hjust = 0.5),
+        text = element_text(size = 22),
+        axis.text = element_text(size = 20)) 
 ```
 
 
 ```{r correlation test plot}
 ggplot(data = DC_atlas, aes(x = avg_node_degree , y = kfr_pooled_pooled_p25)) + 
-  geom_point(size = 1) + 
-  geom_text(aes(label=tract), size=2.5, nudge_y = -.2) +
-  labs(title = "Street Grid Connectedness vs. Mean Income Percentile Rank for Children of Low-Income Parents in Washington, DC", x = "Mean Nodal Degree", y = "Mean Income Percentile Rank") +
+  geom_point(size = 2) + 
+  labs(title = "Street Grid Connectedness vs. Expected Income Percentile Rank for Children of Low-Income Parents in Washington, DC", x = "Mean Nodal Degree", y = "Income Percentile Rank at Age 35") +
   stat_smooth(method = "lm", se = FALSE) +
-  theme_minimal() +
-  theme(plot.title = element_text(size=18,hjust = 0.5))
+  theme_minimal() + 
+  theme(plot.title = element_text(size=28,hjust = 0.5),
+        text = element_text(size = 22),
+        axis.text = element_text(size = 20)) 
 ```
 
 ```{r linear model}
@@ -150,6 +158,7 @@ summary(univariate_model)
 
 cor_coeff_avgNodeDeg <- cor(DC_atlas$kfr_pooled_pooled_p25, DC_atlas$avg_node_degree, use = "complete.obs")
 ```
+
 
 ```{r covariate testing}
 
@@ -226,6 +235,9 @@ ggplot(data = DC_atlas, aes(x = avg_node_degree , y = med_hhinc2016)) +
 
 ```
 
+```{r multivariate}
+
+```
 
 
 
