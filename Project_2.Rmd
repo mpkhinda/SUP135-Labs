@@ -48,7 +48,7 @@ ggplot()+
 
 ```{r calc node degree}
 
-# Example of loop assigning node degree
+# Example of loop calculating node degree
 nodes_example <- nodes %>%
   subset(OBJECTID < 6) # limit example to first five nodes
 
@@ -90,7 +90,7 @@ tracts_w_node_degree <- st_join(tract_geom, nodes, join = st_contains) %>%
   group_by(GEOID) %>%
   summarise(avg_node_degree = mean(node_degree))
 
-# Map plot to visualize average node degree by tract
+# plot map to visualize average node degree by tract
 ggplot()+
   geom_sf(data = tracts_w_node_degree, aes(fill = avg_node_degree), color = NA) +
   scale_fill_viridis_c(option = "rocket") +
@@ -128,9 +128,12 @@ sumStats_avgNodeDeg["Std.Dev"] <- sd(DC_atlas$avg_node_degree, na.rm = T)
 sumStats_avgNodeDeg <- data.frame(as.list(sumStats_avgNodeDeg)) %>%
   rename(Q1 = X1st.Qu.,
          Q3 = X3rd.Qu.)
+
+sumStats_avgNodeDeg
 ```
 
 ```{r node degree histogram}
+# histogram to explore distribution of mean nodal degree across tracts
 ggplot(data = DC_atlas, aes(x = avg_node_degree))+
   geom_histogram(bins = 30, fill = "black", color = "white", size = 2) + 
   labs(title = "Distribution of Street Grid Connectedness (1999 Network) in Washington, DC", y = "Number of Census Tracts", x = "Mean Nodal Degree") + 
@@ -142,6 +145,7 @@ ggplot(data = DC_atlas, aes(x = avg_node_degree))+
 
 
 ```{r correlation test plot}
+# scatterplot and linear regression line
 ggplot(data = DC_atlas, aes(x = avg_node_degree , y = kfr_pooled_pooled_p25)) + 
   geom_point(size = 2) + 
   labs(title = "Street Grid Connectedness vs. Expected Income Percentile Rank for Children of Low-Income Parents in Washington, DC", x = "Mean Nodal Degree", y = "Income Percentile Rank at Age 35") +
@@ -155,88 +159,122 @@ ggplot(data = DC_atlas, aes(x = avg_node_degree , y = kfr_pooled_pooled_p25)) +
 ```{r linear model}
 univariate_model <- lm(kfr_pooled_pooled_p25 ~ avg_node_degree, data = DC_atlas)
 summary(univariate_model)
-
-cor_coeff_avgNodeDeg <- cor(DC_atlas$kfr_pooled_pooled_p25, DC_atlas$avg_node_degree, use = "complete.obs")
 ```
 
 
-```{r covariate testing}
-
-# Built environment factors
-ggplot(data = DC_atlas, aes(x = avg_node_degree , y = extreme_heat)) + 
-  geom_point(size = 1) + 
-  geom_text(aes(label=tract), size=2.5, nudge_y = -.2) +
-  labs(title = "Street Grid Connectedness vs. Extreme Heat in Washington, DC", x = "Average Node Degree", y = "Degrees Above Basline Temperature") +
+```{r socioecon covariance testing}
+# Socioeconomic measures
+# Mean household income in 2000
+ggplot(data = DC_atlas, aes(x = avg_node_degree , y = hhinc_mean2000)) + 
+  geom_point(size = 2) + 
+  labs(title = "Street Grid Connectedness vs. Mean Household Income (2000) in Washington, DC", x = "Mean Nodal Degree", y = "Mean Household Income in 2000") +
   stat_smooth(method = "lm", se = FALSE) +
-  theme_minimal() +
-  theme(plot.title = element_text(size=18,hjust = 0.5))
+  theme_minimal() + 
+  theme(plot.title = element_text(size=28,hjust = 0.5),
+        text = element_text(size = 22),
+        axis.text = element_text(size = 20)) 
 
-ggplot(data = DC_atlas, aes(x = avg_node_degree , y = developed)) + 
-  geom_point(size = 1) + 
-  geom_text(aes(label=tract), size=2.5, nudge_y = -.2) +
-  labs(title = "Street Grid Connectedness vs. Development in Washington, DC", x = "Average Node Degree", y = "Fraction of Land Area Developed") +
+cor_coeff_meanInc_avgNodeDeg <- cor(DC_atlas$avg_node_degree, DC_atlas$hhinc_mean2000, use = "complete.obs")
+
+# Single-parent household share in 2000
+ggplot(data = DC_atlas, aes(x = avg_node_degree , y = singleparent_share2000)) + 
+  geom_point(size = 2) + 
+  labs(title = "Street Grid Connectedness vs. Share of Single-Parent Households (2000) in Washington, DC", x = "Mean Nodal Degree", y = "Fraction of Single-Parent Households in 2000") +
   stat_smooth(method = "lm", se = FALSE) +
-  theme_minimal() +
-  theme(plot.title = element_text(size=18,hjust = 0.5))
+  theme_minimal() + 
+  theme(plot.title = element_text(size=28,hjust = 0.5),
+        text = element_text(size = 22),
+        axis.text = element_text(size = 20)) 
 
-ggplot(data = DC_atlas, aes(x = avg_node_degree , y = popdensity2000)) + 
-  geom_point(size = 1) + 
-  geom_text(aes(label=tract), size=2.5, nudge_y = -150) +
-  labs(title = "Street Grid Connectedness vs. Population Density in Washington, DC", x = "Average Node Degree", y = "Population Density in 2000") +
+cor_coeff_singleParents_avgNodeDeg <- cor(DC_atlas$avg_node_degree, DC_atlas$singleparent_share2000, use = "complete.obs")
+
+# Single-parent household share in 2000
+ggplot(data = DC_atlas, aes(x = avg_node_degree , y = emp2000)) + 
+  geom_point(size = 2) + 
+  labs(title = "Street Grid Connectedness vs. Employment Rate (2000) in Washington, DC", x = "Mean Nodal Degree", y = "Employment Rate in 2000") +
   stat_smooth(method = "lm", se = FALSE) +
-  theme_minimal() +
-  theme(plot.title = element_text(size=18,hjust = 0.5))
+  theme_minimal() + 
+  theme(plot.title = element_text(size=28,hjust = 0.5),
+        text = element_text(size = 22),
+        axis.text = element_text(size = 20)) 
 
+cor_coeff_emp_avgNodeDeg <- cor(DC_atlas$avg_node_degree, DC_atlas$emp2000, use = "complete.obs")
+```
 
+```{r race covariance}
 # Racial demographics
+# Share of black residents
 ggplot(data = DC_atlas, aes(x = avg_node_degree , y = share_black2000)) + 
   geom_point(size = 1) + 
-  geom_text(aes(label=tract), size=2.5, nudge_y = -.2) +
-  labs(title = "Street Grid Connectedness vs. Share of Black Residents in Washington, DC", x = "Average Node Degree", y = "Share of Black Residents in 2000") +
+  labs(title = "Street Grid Connectedness vs. Share of Black Residents in Washington, DC", x = "Mean Nodal Degree", y = "Share of Black Residents in 2000") +
   stat_smooth(method = "lm", se = FALSE) +
   theme_minimal() +
-  theme(plot.title = element_text(size=18,hjust = 0.5))
+  theme(plot.title = element_text(size=28,hjust = 0.5),
+        text = element_text(size = 22),
+        axis.text = element_text(size = 20)) 
 
+cor_coeff_Black_avgNodeDeg <- cor(DC_atlas$avg_node_degree, DC_atlas$share_black2000, use = "complete.obs")
+
+# Share of white residents
 ggplot(data = DC_atlas, aes(x = avg_node_degree , y = share_white2000)) + 
   geom_point(size = 1) + 
-  geom_text(aes(label=tract), size=2.5, nudge_y = -.01) +
-  labs(title = "Street Grid Connectedness vs. Share of White Residents in Washington, DC", x = "Average Node Degree", y = "Share of White Residents in 2000") +
+  labs(title = "Street Grid Connectedness vs. Share of White Residents in Washington, DC", x = "Mean Nodal Degree", y = "Share of White Residents in 2000") +
   stat_smooth(method = "lm", se = FALSE) +
   theme_minimal() +
-  theme(plot.title = element_text(size=18,hjust = 0.5))
+  theme(plot.title = element_text(size=28,hjust = 0.5),
+        text = element_text(size = 22),
+        axis.text = element_text(size = 20)) 
 
+cor_coeff_white_avgNodeDeg <- cor(DC_atlas$avg_node_degree, DC_atlas$share_white2000, use = "complete.obs")
+
+# Share of Hispanic residents
 ggplot(data = DC_atlas, aes(x = avg_node_degree , y = share_hisp2000)) + 
   geom_point(size = 1) + 
-  geom_text(aes(label=tract), size=2.5, nudge_y = -.01) +
-  labs(title = "Street Grid Connectedness vs. Share of Hispanic Residents in Washington, DC", x = "Average Node Degree", y = "Share of Hispanic Residents in 2000") +
+  labs(title = "Street Grid Connectedness vs. Share of Hispanic Residents in Washington, DC", x = "Mean Nodal Degree", y = "Share of Hispanic Residents in 2000") +
   stat_smooth(method = "lm", se = FALSE) +
   theme_minimal() +
-  theme(plot.title = element_text(size=18,hjust = 0.5))
+  theme(plot.title = element_text(size=28,hjust = 0.5),
+        text = element_text(size = 22),
+        axis.text = element_text(size = 20)) 
 
+cor_coeff_hisp_avgNodeDeg <- cor(DC_atlas$avg_node_degree, DC_atlas$share_hisp2000, use = "complete.obs")
 
-
-# Economic measures
-ggplot(data = DC_atlas, aes(x = avg_node_degree , y = med_hhinc1990)) + 
+# Share of asian residents
+ggplot(data = DC_atlas, aes(x = avg_node_degree , y = share_asian2000)) + 
   geom_point(size = 1) + 
-  geom_text(aes(label=tract), size=2.5, nudge_y = -1500) +
-  labs(title = "Street Grid Connectedness vs. Median Household Income in Washington, DC", x = "Average Node Degree", y = "Median Household Income in 1990") +
+  labs(title = "Street Grid Connectedness vs. Share of Asian Residents in Washington, DC", x = "Mean Nodal Degree", y = "Share of Asian Residents in 2000") +
   stat_smooth(method = "lm", se = FALSE) +
   theme_minimal() +
-  theme(plot.title = element_text(size=18,hjust = 0.5))
+  theme(plot.title = element_text(size=28,hjust = 0.5),
+        text = element_text(size = 22),
+        axis.text = element_text(size = 20)) 
 
-
-ggplot(data = DC_atlas, aes(x = avg_node_degree , y = med_hhinc2016)) + 
-  geom_point(size = 1) + 
-  geom_text(aes(label=tract), size=2.5, nudge_y = -1500) +
-  labs(title = "Street Grid Connectedness vs. Median Household Income in Washington, DC", x = "Average Node Degree", y = "Median Household Income in 2016") +
-  stat_smooth(method = "lm", se = FALSE) +
-  theme_minimal() +
-  theme(plot.title = element_text(size=18,hjust = 0.5))
-
+cor_coeff_asian_avgNodeDeg <- cor(DC_atlas$avg_node_degree, DC_atlas$share_asian2000, use = "complete.obs")
 ```
 
-```{r multivariate}
 
+```{r multivariate regression 1}
+# Multivariate regression to control for socioecon factors only
+multivariate_model_no_race <- lm(kfr_pooled_pooled_p25 ~ avg_node_degree 
+                         + singleparent_share2000 
+                         + emp2000, 
+                         data = DC_atlas)
+
+summary(multivariate_model_no_race)
+```
+
+```{r multivariate regression 2}
+# Multivariate regression to control for socioecon factors and race
+multivariate_model_race <- lm(kfr_pooled_pooled_p25 ~ avg_node_degree 
+                         + singleparent_share2000 
+                         + emp2000
+                         + share_black2000
+                         + share_white2000
+                         + share_hisp2000
+                         + share_asian2000, 
+                         data = DC_atlas)
+
+summary(multivariate_model_race)
 ```
 
 
