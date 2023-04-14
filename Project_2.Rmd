@@ -6,7 +6,7 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-# Settings for PDF output
+# Formatting settings 
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE) 
 knitr::opts_chunk$set(fig.width=12, fig.height=7, fig.align = "center") 
 
