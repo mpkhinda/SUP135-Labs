@@ -96,9 +96,7 @@ rdplot(y = holc1930$rent,
 
 #### 1c: Regression Discontinuity Design Validity
 
-Driven by outliers 
-
-
+As with any regression discontinuity design, we can evaluate the validity of the identification assumption by looking at the continuity of predetermined characteristics just above and just below the threshold. In the three charts above, we can see that homeownership in 1930 is essentially identical across the cut-off, and that the trend lines for share foreign born and mean rents in 1930 were only slightly discontinuous which is primarly driven by outliers. From this we can say that an RDD is a plausible approach to take for analyzing these data. 
 
 
 #### 1d: Homeownership and Population Size
@@ -124,10 +122,10 @@ rdplot(y = holc_1940_2010$ownhome,
 
 ```{r rd_calcs}
 # Indicator for threshold
-holc$above_threshold <- ifelse(holc$dist_from_cut >= 0, 1, 0)
+holc_1940_2010$above_threshold <- ifelse(holc_1940_2010$dist_from_cut >= 0, 1, 0)
 
 # Create interaction term
-holc$interaction_term <- (holc$dist_from_cut * holc$above_threshold)
+holc_1940_2010$interaction_term <- (holc_1940_2010$dist_from_cut * holc_1940_2010$above_threshold)
 
 # calculate rdd 
 rdd <- lm(ownhome ~ above_threshold + 
@@ -138,10 +136,14 @@ rdd <- lm(ownhome ~ above_threshold +
 coeftest(rdd, vcovCL(rdd, cluster = holc_1940_2010$city_id))
 ```
 
+From the regression discontinuity calculations it appears as if the effect of being above the threshold on homeownership rates is not statistically significant. This is reflected in the plot in question 1d which shows only slight discontinuity at the threshold of a population size of 40,000. However, rather than concluding that there is no effect of HOLC mapping on homeownership rates, it is possible that a regression discontinuity design is not best suited for this type of analysis. To better understand the effects of the policy on trends over time, a difference-in-differences approach may be more appropriate.  
+
+
 ## Question 3: Graphical Difference-in-Differences Analysis
 
+#### 3a: Homeownership Rates Over Time (1910-2010)
 ```{r diff_plots}
-holc$treated <- holc$above_threshold
+holc$treated <- ifelse(holc$dist_from_cut >= 0, 1, 0)
 
 ggplot(holc, aes(x = year, 
                  y = ownhome, 
@@ -157,6 +159,11 @@ ggplot(holc, aes(x = year,
       labs(x = "Year", y = "Home Onwership Rate", shape = "", color = "") + 
       theme(legend.position = "bottom") 
 ```
+
+#### 3b: Parallel Trends Identification Assumption
+
+In order to establish a causal link between the effect of a policy and an outcome over time using the difference-in-differences method, the parallel trends assumption must be satisfied to preclude possible confounding effects. The parallel trends assumption requires that the trends in both the treatment and control groups are closely correlated before the intervention. Here, while there are only 3 data points before the 1935 threshold, we can stil observe that homeownership rates in cities with populations greater and less than 40,000 were moving parallel enough before the HOLC maps were drawn that a diff-in-diff analysis could be justified. 
+
 
 ## Question 4: Conditional Means
 
@@ -179,6 +186,8 @@ Y_control_diff <- Y_control_post - Y_control_pre
 Y_diffdiff <- Y_treat_diff - Y_control_diff
 ```
 
+Using a conditional means approach, where difference in homeownership rates is calculated for both the control and treatment groups individually, then subtracted from one another to arrive at the difference in differences, the measured effect of HOLC maps is `r Y_diffdiff`. 
+
 ## Question 5: Difference-in-Differences Calculations
 
 ```{r diff_calcs}
@@ -187,24 +196,38 @@ holc_1910_1960 <- subset(holc, year >= 1910 & year <= 1960)
 
 # Assign indicator variable for post 1940
 holc_1910_1960$post <- ifelse(holc_1910_1960$year >= 1940, 1, 0)
+holc_1910_1960$above_threshold <- holc_1910_1960$treated
 
 # Define interaction term
-holc_1910_1960$dd_interaction_term <- (holc_1910_1960$above_threshold*holc_1910_1960$post)
+holc_1910_1960$dd_interaction_term <- 
+  (holc_1910_1960$above_threshold*holc_1910_1960$post)
 
 # Create diff in diff regression
-dd_lm <- lm(ownhome ~ dd_interaction_term + post + above_threshold, data = holc_1910_1960)
+dd_lm <- lm(ownhome ~ dd_interaction_term + 
+              post + above_threshold, data = holc_1910_1960)
 coeftest(dd_lm, vcovCL(dd_lm, cluster = holc_1910_1960$city_id))
 ```
+
+Using a multivariable regression, the effect of the HOLC maps on homeownership rates is `r dd_lm$coefficients["dd_interaction_term"]`, which is equivalent to the value calculated using conditional means.
+
 
 ## Question 6: Fixed-Effects Regression
 
 ```{r fixed_effects}
-
+# Create fixed-effects diff in diff regression
+dd_lm_mv <- lm(ownhome ~ dd_interaction_term + 
+              post + above_threshold +
+              factor(city_id) +
+              factor(year), data = holc_1910_1960)
+coeftest(dd_lm_mv, vcovCL(dd_lm_mv, cluster = holc_1910_1960$city_id))
 ```
+
+When controlling for differences between cities and years using a fixed-effects multivariable regression, the magnitude of the effect of HOLC maps on increasing homeownership rates grows slightly from `r dd_lm$coefficients["dd_interaction_term"]` to `r dd_lm_mv$coefficients["dd_interaction_term"]`. 
+
 
 ## Question 7: Causal Effect of HOLC Redlining on Homeownership
 
-
+Due to the parallel trends assumption being satisfied in homeownership rates between cities with a population of less than 40,000 (control) and those with more than 40,000 (treatment), we can make a causal claim about the impact of HOLC mapping—which was contingent on population size—on the rates of homeownership in those cities. Specifically, we observe that in cities that were redlined, homeownership grew `r dd_lm_mv$coefficients["dd_interaction_term"]*100`% less than in areas that were not. 
 
 
 
