@@ -1,0 +1,212 @@
+---
+title: 'HKS SUP-135 Lab 9: The Long-Run Causal Effects of HOLC Redlining'
+author: "Matt Khinda"
+date: "4/21/2023"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# Settings for PDF output
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE) 
+knitr::opts_chunk$set(fig.width=12, fig.height=5.5, fig.align = "center") 
+
+# Require packages and install and load if not already
+if (!require(haven)) install.packages("haven"); library(haven)
+if (!require(tidyverse)) install.packages("tidyverse"); library(tidyverse)
+if (!require(ggplot2)) install.packages("ggplot2"); library(ggplot2)
+if (!require(statar)) install.packages("statar"); library(statar)
+if (!require(here)) install.packages("here"); library(here)
+if (!require(rpart)) install.packages("rpart"); library(rpart)
+if (!require(lmtest)) install.packages("lmtest"); library(lmtest)
+if (!require(rdrobust)) install.packages("rdrobust"); library(rdrobust)
+if (!require(sandwich)) install.packages("sandwich"); library(sandwich)
+
+# Clear workspace 
+rm(list=ls())
+cat('\014')
+```
+
+```{r load data, include=FALSE}
+holc <- read_dta(here("datasets", "holc.dta"))
+```
+
+```{r data setup}
+# determine distance from threshold
+holc$dist_from_cut <- holc$pop_1930 - 40000
+
+# subset data
+holc1930 <- subset(holc, year == 1930)
+```
+
+## Question 1: Graphical Regression Discontinuity Analysis
+
+#### 1a: HOLC Maps and Population Size
+```{r bin_scatter_1}
+# Plot discontinuity of HOLC mapping
+rdplot(y = holc1930$holc_map, 
+       x = holc1930$dist_from_cut,
+       c = 0, 
+       p = 1,
+       nbins = 20,
+       binselect = "es",
+       x.label = "Distance from 40,000 Population Threshold in 1930",
+       y.label = "Likelihood of HOLC Mapping",
+       title = "Discontinuity of HOLC Mapping and Population Size"
+       )
+```
+
+#### 1b: Predetermined Characteristics
+```{r bin_scatter_2}
+# Plot discontinuity of ownership
+rdplot(y = holc1930$ownhome, 
+       x = holc1930$dist_from_cut,
+       c = 0, 
+       p = 1,
+       nbins = 20,
+       binselect = "es",
+       x.label = "Distance from 40,000 Population Threshold in 1930",
+       y.label = "Homeownership Rate in 1930",
+       title = "Smoothness Test: Homeownership"
+       )
+
+# Plot discontinuity of foreign born pop
+rdplot(y = holc1930$foreign_born, 
+       x = holc1930$dist_from_cut,
+       c = 0, 
+       p = 1,
+       nbins = 20,
+       binselect = "es",
+       x.label = "Distance from 40,000 Population Threshold in 1930",
+       y.label = "Share Foreign Born in 1930",
+       title = "Smoothness Test: Foreign Born Population"
+       )
+
+# Plot discontinuity of rent
+rdplot(y = holc1930$rent, 
+       x = holc1930$dist_from_cut,
+       c = 0, 
+       p = 1,
+       nbins = 20,
+       binselect = "es",
+       x.label = "Distance from 40,000 Population Threshold in 1930",
+       y.label = "Mean Rent in 1930",
+       title = "Smoothness Test: Mean Rent"
+       )
+```
+
+#### 1c: Regression Discontinuity Design Validity
+
+Driven by outliers 
+
+
+
+
+#### 1d: Homeownership and Population Size
+```{r bin_scatter_3}
+# subset data for specific date range
+holc_1940_2010 <- subset(holc, year >= 1940 & year <= 2010)
+
+# Plot discontinuity of ownership
+rdplot(y = holc_1940_2010$ownhome, 
+       x = holc_1940_2010$dist_from_cut,
+       c = 0, 
+       p = 1,
+       nbins = 20,
+       binselect = "es",
+       x.label = "Distance from 40,000 Population Threshold in 1930",
+       y.label = "Homeownership Rate between 1940 and 2010",
+       title = "Smoothness Test: Homeownership"
+       )
+
+```
+
+## Question 2: Regression Discontinuity Calculations
+
+```{r rd_calcs}
+# Indicator for threshold
+holc$above_threshold <- ifelse(holc$dist_from_cut >= 0, 1, 0)
+
+# Create interaction term
+holc$interaction_term <- (holc$dist_from_cut * holc$above_threshold)
+
+# calculate rdd 
+rdd <- lm(ownhome ~ above_threshold + 
+            dist_from_cut + 
+            interaction_term, 
+          data = holc_1940_2010)
+
+coeftest(rdd, vcovCL(rdd, cluster = holc_1940_2010$city_id))
+```
+
+## Question 3: Graphical Difference-in-Differences Analysis
+
+```{r diff_plots}
+holc$treated <- holc$above_threshold
+
+ggplot(holc, aes(x = year, 
+                 y = ownhome, 
+                 color = factor(treated, 
+                                labels = c("1930 pop < 40k (Treatment)", 
+                                           "1930 pop > 40k (Control)")),
+                 shape = factor(treated, 
+                                labels = c("1930 pop < 40k (Treatment)", 
+                                           "1930 pop > 40k (Control)")))) +
+      geom_vline(xintercept = 1935) +
+      stat_summary(fun = "mean", geom = "point") +
+      stat_summary(fun = "mean", geom = "line") + 
+      labs(x = "Year", y = "Home Onwership Rate", shape = "", color = "") + 
+      theme(legend.position = "bottom") 
+```
+
+## Question 4: Conditional Means
+
+```{r cond_means}
+# Calculate difference for treatment group pre and post
+Y_treat_pre <- with(subset(holc, treated ==1 & year >= 1910 & year <= 1930), 
+                    mean(ownhome, na.rm = T))
+Y_treat_post <- with(subset(holc, treated ==1 & year >= 1940 & year <= 1960), 
+                     mean(ownhome, na.rm = T))
+Y_treat_diff <- Y_treat_post - Y_treat_pre 
+
+# Calculate difference for control group pre and post
+Y_control_pre <- with(subset(holc, treated ==0 & year >= 1910 & year <= 1930), 
+                    mean(ownhome, na.rm = T))
+Y_control_post <- with(subset(holc, treated ==0 & year >= 1940 & year <= 1960), 
+                     mean(ownhome, na.rm = T))
+Y_control_diff <- Y_control_post - Y_control_pre 
+
+# Calculate difference in differences
+Y_diffdiff <- Y_treat_diff - Y_control_diff
+```
+
+## Question 5: Difference-in-Differences Calculations
+
+```{r diff_calcs}
+# Subset data
+holc_1910_1960 <- subset(holc, year >= 1910 & year <= 1960)
+
+# Assign indicator variable for post 1940
+holc_1910_1960$post <- ifelse(holc_1910_1960$year >= 1940, 1, 0)
+
+# Define interaction term
+holc_1910_1960$dd_interaction_term <- (holc_1910_1960$above_threshold*holc_1910_1960$post)
+
+# Create diff in diff regression
+dd_lm <- lm(ownhome ~ dd_interaction_term + post + above_threshold, data = holc_1910_1960)
+coeftest(dd_lm, vcovCL(dd_lm, cluster = holc_1910_1960$city_id))
+```
+
+## Question 6: Fixed-Effects Regression
+
+```{r fixed_effects}
+
+```
+
+## Question 7: Causal Effect of HOLC Redlining on Homeownership
+
+
+
+
+
+
+
